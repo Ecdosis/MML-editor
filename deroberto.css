@@ -1,0 +1,29 @@
+/* box to receive text */
+#target { width: 482px; height:482px; border: 1px solid; float: left; display: inline-block; margin-top:2px; overflow: auto; padding: 10px 10px 10px 10px; }
+/* the source textarea */
+#source { width: 480px; height:490px; float:left; display: inline-block; padding: 10px 10px 0px 10px }
+/* formats supported by the MML dialect */
+body {margin: 0px 2px 0px 2px; font: 14px arial, sans-serif;}
+p {margin-top:0}
+pre {margin-left: 20px; font: 14px arial, sans-serif}
+h1,h2 {text-align:center }
+.section { margin-bottom: 50px }
+.centered { text-align: center }
+.italics { font-style: italic}
+.page {display:none;}
+/* dividers */
+/* centered plus divider */
+.plus-lefttop { border-right: 1px solid; border-bottom:1px solid; width: 70px; height: 5px }
+.plus-righttop { border-bottom:1px solid; width: 70px; height:5px}
+.plus-leftbot { border-right: 1px solid; width:70px; height:5px}
+.plus-rightbot { width:70px; height:5px}
+.plus { border-collapse: collapse; border-spacing: 0; margin-left:auto; margin-right:auto; margin-bottom:10px }
+
+/* centered dash divider */
+.dash-lefttop { border-bottom:1px solid; width: 70px; height: 5px }
+.dash-righttop { border-bottom:1px solid; width: 70px; height:5px}
+.dash-leftbot { width:70px; height:5px}
+.dash-rightbot { width:70px; height:5px}
+.dash { border-collapse: collapse; border-spacing: 0; margin-left:auto; margin-right:auto; }
+.letter-spacing { letter-spacing: 0.1em; word-spacing: 3px}
+

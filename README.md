@@ -18,3 +18,5 @@ the properties, NOT the MML, are sent to the server. When re-editing the
 document the MML expression is regenerated using the dialect file. In 
 this way the customisability of the user interface is preserved while 
 achieving a high degree of interoperability.
+
+At the moment to use it load mml-editor into your browser and copy the contents of DeRoverto-1920.mml into the textarea on the left.

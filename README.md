@@ -7,16 +7,17 @@ historical documents, such as automatic numbering of lists, links to
 other HTML pages (how many printed or manuscript books have those?), 
 inline HTML etc. But they also add several features not found in 
 MarkDown, such as smart-quotes, automatic joining up of hyphenated 
-words, poetry indentation, etc. The MML editor here was originally 
-designed for the De Roberto editon (a novel) but has been generalised 
-via a JSON "dialect" file, which speciies which tags are defined. These 
-are usually just single characters, like *italic* for italics. But not 
-only what they are but also what they signify is configurable. Each 
-"tag" is given a property, and it is these properties that get encoded 
-into the HTML preview as class attributes. When the user saves the text 
-the properties, NOT the MML, are sent to the server. When re-editing the 
-document the MML expression is regenerated using the dialect file. In 
-this way the customisability of the user interface is preserved while 
-achieving a high degree of interoperability.
+words, poetry indentation, page-numering, etc. The MML editor here was 
+originally designed for the De Roberto editon (a novel) but has been 
+generalised via a JSON "dialect" file, which speciies which tags are 
+defined. These are usually just single characters, like \*italic\* for 
+italics. But not only what they are but also what they signify is 
+configurable. Each "tag" is given a property, and it is these properties 
+that get encoded into the HTML preview as class attributes. When the 
+user saves the text the properties, NOT the MML, are sent to the server. 
+When re-editing the document the MML expression is regenerated using the 
+dialect file. In this way the customisability of the user interface is 
+preserved while achieving a high degree of interoperability.
 
-At the moment to use it load mml-editor into your browser and copy the contents of DeRoverto-1920.mml into the textarea on the left.
+At the moment to use it load mml-editor into your browser and copy the 
+contents of DeRoberto-1920.mml into the textarea on the left.

@@ -530,6 +530,12 @@ function processHeadings( text, opts, form )
     }
     return text;
 }
+/**
+ * Milestones are markers that should be invisibly rendered
+ * @param text the text of the paragraph
+ * @param opts the dialect options
+ * @return the transformed text
+ */
 function processMilestones( text, opts )
 {
     if ( opts.milestones != undefined && opts.milestones.length>0 )
@@ -556,7 +562,7 @@ function processMilestones( text, opts )
                     }
                 }
                 if ( j==milestones.length )
-                    res += lines[i];
+                    res += lines[i]+"\n";
             }
         }
         text = res;

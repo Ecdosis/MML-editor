@@ -9,7 +9,7 @@ inline HTML etc. But they also add several features not found in
 MarkDown, such as smart-quotes, automatic joining up of hyphenated 
 words, poetry indentation, page-numering, etc. The MML editor here was 
 originally designed for the De Roberto editon (a novel) but has been 
-generalised via a JSON "dialect" file, which speciies which tags are 
+generalised via a JSON "dialect" file, which specifies which tags are 
 defined. These are usually just single characters, like \*italic\* for 
 italics. But not only what they are but also what they signify is 
 configurable. Each "tag" is given a property, and it is these properties 

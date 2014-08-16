@@ -528,10 +528,11 @@ function processHeadings( text, opts, form )
             }
         }
         var lines = text.split("\n");
-        num_lines += lines.length-1;
         for ( var i=0;i<lines.length;i++ )
         {
             var line = lines[i];
+            if ( i > 0 )
+                num_lines++;
             if ( i>0 && line.length > 0 )
             {
                 var prev = lines[i-1];
@@ -557,6 +558,8 @@ function processHeadings( text, opts, form )
                         && isMilestone(prev,mss)!=undefined )
                     {
                         var ms = isMilestone(prev,mss);
+                        if ( ms.prop="page" )
+                            page_lines.push(num_lines);
                         res += '<span class="'+ms.prop+'">'
                         +line.slice(ms.leftTag.length,endPos(prev,ms.rightTag))
                         +'</span>';
@@ -572,6 +575,8 @@ function processHeadings( text, opts, form )
             if ( mss != undefined && isMilestone(line,mss)!=undefined )
             {
                 var ms = isMilestone(line,mss);
+                if ( ms.prop="page" )
+                    page_lines.push(num_lines);
                 res += '<span class="'+ms.prop+'">'
                     +line.slice(ms.leftTag.length,endPos(line,ms.rightTag))
                     +'</span>';
@@ -620,13 +625,15 @@ function processSection( section,opts )
     var paras = section.split("\n\n");
     for ( var i=0;i<paras.length;i++ )
     {
+        if ( i > 0 )
+            num_lines += 2;
         if ( paras[i].length > 0 )
             html += processPara(paras[i],opts);
     }
-    num_lines += (paras.length-1)*2;
     return html;
 }
 var num_lines = 0;
+var page_lines = new Array();
 /**
  * Convert the MML text into HTML
  * @param text the text to convert
@@ -641,10 +648,11 @@ function toHTML(text,opts)
     var sections = text.split("\n\n\n");
     for ( var i=0;i<sections.length;i++ )
     {
+        if ( i > 0 )
+            num_lines += 3;
         html+= '<div class="'+sectionName+'">'
             +processSection(sections[i],opts);
         html += '</div>';
     }
-    num_lines += (sections.length-1)*3;
     return html;
 }

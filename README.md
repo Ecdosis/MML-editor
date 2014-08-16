@@ -17,7 +17,8 @@ that get encoded into the HTML preview as class attributes. When the
 user saves the text the properties, NOT the MML, are sent to the server. 
 When re-editing the document the MML expression is regenerated using the 
 dialect file. In this way the customisability of the user interface is 
-preserved while achieving a high degree of interoperability.
+preserved while achieving a high degree of simplicity and 
+interoperability.
 
 To use it load mml-editor.html into any browser. You need an Internet 
 connection for the jQuery for it to work. Eventually this whole editor 

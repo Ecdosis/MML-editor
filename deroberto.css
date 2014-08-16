@@ -11,6 +11,7 @@ h1,h2 {text-align:center }
 .centered { text-align: center }
 .italics { font-style: italic}
 .page {display:none;}
+.soft-hyphen { display:none }
 /* dividers */
 /* centered plus divider */
 .plus-lefttop { border-right: 1px solid; border-bottom:1px solid; width: 70px; height: 5px }

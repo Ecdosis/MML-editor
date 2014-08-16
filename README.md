@@ -7,7 +7,7 @@ historical documents, such as automatic numbering of lists, links to
 other HTML pages (how many printed or manuscript books have those?), 
 inline HTML etc. But they also add several features not found in 
 MarkDown, such as smart-quotes, automatic joining up of hyphenated 
-words, poetry indentation, page-numering, etc. The MML editor here was 
+words, poetry indentation, page-numbering, etc. The MML editor here was 
 originally designed for the De Roberto editon (a novel) but has been 
 generalised via a JSON "dialect" file, which specifies which tags are 
 defined. These are usually just single characters, like \*italic\* for 

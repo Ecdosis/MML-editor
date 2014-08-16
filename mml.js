@@ -170,7 +170,7 @@ function processSmartQuotes( text, opts )
 }
 /**
  * Search for and replace all character formats in the paragraph
- * @param text the text to scan and modify
+ * @param text the text of the paragraph
  * @param opts the options that may contain character format defs
  * @return the possibly modified text with spans inserted
  */ 
@@ -187,6 +187,8 @@ function processCfmts(text,opts)
             if ( cfmt.tag != undefined )
                 tags[cfmt.tag] = (cfmt.prop!=undefined)?cfmt.prop:cfmt.tag;
         }
+        // add default soft-hyphens
+        tags["-\n"] = "soft-hyphen";
         var i = 0;
         while ( i<text.length )
         {
@@ -201,7 +203,14 @@ function processCfmts(text,opts)
                 }
                 if ( j == tag.length )
                 {
-                    if ( stack.length>0&&peek(stack)==tag )
+                    if ( tag == "-\n" )
+                    {
+                        text = text.slice(0,i)
+                            +'<span class="soft-hyphen">-</span>'
+                            +text.slice(i+2);
+                        i += 34;
+                    }
+                    else if ( stack.length>0&&peek(stack)==tag )
                     {
                         stack.pop();
                         text = text.slice(0,i)+"</span>"
@@ -271,7 +280,7 @@ function endPos( text, tag )
 }
 /**
  * Scan the start and end of the paragraph for defined para formats.
- * @param text the text to scan and modify 
+ * @param text the text to of the paragraph 
  * @param opts the dialect options
  * @param form VAR param set to true if format was inserted
  * @return the possibly modified text with p-formats inserted

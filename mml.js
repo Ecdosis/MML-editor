@@ -485,17 +485,37 @@ function isHeading( line, c )
     return j == line.length;
 }
 /**
- * Process setext type headings (we don't do atx)
+ * Is the current line a milestone?
+ * @para, line the line to test
+ * @param mss an array of milestone defs
+ * @return the relevant milestone
+ */
+function isMilestone( line, mss )
+{
+    var line2 = line.trim();
+    for ( var i=0;i<mss.length;i++ )
+    {
+        var ms = mss[i];
+        if ( startPos(line2,ms.leftTag)==0 
+            && endPos(line2,ms.rightTag)==line2.length-ms.rightTag.length )
+            return ms;
+    }
+    return undefined;
+}
+/**
+ * Process setext type headings (we don't do atx).Oh, and do milestones.
  * @param text the text to give headings to
  * @param opts the dialect options
  * @param form VAR param to set to true if it was a heading
- * @return the possibly modiied text
+ * @return the possibly modified text
  */
 function processHeadings( text, opts, form )
 {
     if ( opts.headings !=undefined )
     {
         var res = "";
+        var mss = (opts.milestones!=undefined&&opts.milestones.length>0)
+            ?opts.milestones:undefined;
         var heads = new Array();
         var tags = new Array();
         for ( var i=0;i<opts.headings.length;i++ )
@@ -508,71 +528,56 @@ function processHeadings( text, opts, form )
             }
         }
         var lines = text.split("\n");
+        num_lines += lines.length-1;
         for ( var i=0;i<lines.length;i++ )
         {
             var line = lines[i];
-            if ( i>0 && line.length > 0 && line.charAt(0) in heads )
+            if ( i>0 && line.length > 0 )
             {
-                var j = 0;
-                var c = line.charAt(0);
-                var attr = ' class="'+heads[c]+'" title="'+heads[c]+'"';
-                if ( isHeading(line,c) )
+                var prev = lines[i-1];
+                if ( line.charAt(0) in heads )
                 {
-                    // all chars the same
-                    res += '<'+tags[heads[c]]+attr+'>'+lines[i-1]
-                        +'</'+tags[heads[c]]+'>\n';  
-                    form.formatted = true; 
+                    var j = 0;
+                    var ms;
+                    var c = line.charAt(0);
+                    var attr = ' class="'+heads[c]+'" title="'+heads[c]+'"';
+                    if ( isHeading(line,c) )
+                    {
+                        // all chars the same
+                        res += '<'+tags[heads[c]]+attr+'>'+prev
+                            +'</'+tags[heads[c]]+'>\n';  
+                        form.formatted = true; 
+                    }
+                    else 
+                        res += prev+'\n';
                 }
-                else
-                    res += lines[i-1]+'\n';
+                else if ( prev.length > 0 )
+                {
+                    if ( mss != undefined 
+                        && isMilestone(prev,mss)!=undefined )
+                    {
+                        var ms = isMilestone(prev,mss);
+                        res += '<span class="'+ms.prop+'">'
+                        +line.slice(ms.leftTag.length,endPos(prev,ms.rightTag))
+                        +'</span>';
+                    }
+                    else
+                        res += prev+'\n';
+                }
             }
-            else if ( i > 0 )
-                res += lines[i-1]+'\n';
         }
         if ( lines[lines.length-1].length > 0 )
         {
             var line = lines[lines.length-1];
-            if ( !isHeading(line,line.charAt(0)) )
-                res += line + "\n";
-        }
-        text = res;
-    }
-    return text;
-}
-/**
- * Milestones are markers that should be invisibly rendered
- * @param text the text of the paragraph
- * @param opts the dialect options
- * @return the transformed text
- */
-function processMilestones( text, opts )
-{
-    if ( opts.milestones != undefined && opts.milestones.length>0 )
-    {
-        var milestones = opts.milestones;
-        var lines = text.split("\n");
-        var res = "";
-        for ( var i=0;i<lines.length;i++ )
-        {
-            if ( lines[i].length>0)
+            if ( mss != undefined && isMilestone(line,mss)!=undefined )
             {
-                var j=0;
-                for ( ;j<milestones.length;j++ )
-                {
-                    var ms = milestones[j];
-                    var line = lines[i].trim();
-                    if ( startPos(line,ms.leftTag)==0 
-                        && endPos(line,ms.rightTag)==line.length-ms.rightTag.length )
-                    {
-                        res += '<span class="'+ms.prop+'">'
-                            +line.slice(ms.leftTag.length,endPos(line,ms.rightTag))
-                            +'</span>';
-                        break;
-                    }
-                }
-                if ( j==milestones.length )
-                    res += lines[i]+"\n";
+                var ms = isMilestone(line,mss);
+                res += '<span class="'+ms.prop+'">'
+                    +line.slice(ms.leftTag.length,endPos(line,ms.rightTag))
+                    +'</span>';
             }
+            else if ( !isHeading(line,line.charAt(0)) )
+                res += line + "\n";
         }
         text = res;
     }
@@ -598,7 +603,6 @@ function processPara( text, opts )
     text = processQuotations(text,opts,form);
     text = processPfmts(text,opts,form);
     text = processDividers(text,opts,form);
-    text = processMilestones(text,opts);
     text = processCfmts(text,opts);
     if ( !form.formatted && text.length > 0 )
         text = '<p'+attr+'>'+text+'</p>';
@@ -619,8 +623,10 @@ function processSection( section,opts )
         if ( paras[i].length > 0 )
             html += processPara(paras[i],opts);
     }
+    num_lines += (paras.length-1)*2;
     return html;
 }
+var num_lines = 0;
 /**
  * Convert the MML text into HTML
  * @param text the text to convert
@@ -639,5 +645,6 @@ function toHTML(text,opts)
             +processSection(sections[i],opts);
         html += '</div>';
     }
+    num_lines += (sections.length-1)*3;
     return html;
 }

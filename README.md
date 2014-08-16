@@ -19,5 +19,6 @@ When re-editing the document the MML expression is regenerated using the
 dialect file. In this way the customisability of the user interface is 
 preserved while achieving a high degree of interoperability.
 
-At the moment to use it load mml-editor into your browser and copy the 
-contents of DeRoberto-1920.mml into the textarea on the left.
+To use it load mml-editor.html into any browser. You need an Internet 
+connection for the jQuery for it to work. Eventually this whole editor 
+will become a jQuery plugin.

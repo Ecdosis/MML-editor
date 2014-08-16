@@ -241,10 +241,10 @@ function startPos( text, tag )
         return -1;
 }
 /**
- * Find start of tag after leading white space
+ * Find the last instance of tag before trailing white space
  * @param text the text to search
- * @param tag the tag to find at the start
- * @return -1 on failure else index of tag-start at start of text
+ * @param tag the tag to find at the end
+ * @return -1 on failure else index of tag-start at end of text
  */
 function endPos( text, tag )
 {

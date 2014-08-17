@@ -3,7 +3,7 @@
 
 MMLs are based on [Markdown](http://daringfireball.net/projects/markdown/syntax). They are designed to represent historical printed and handwritten documents, to capture their features. Hence MMLs do not support word-processor features of MarkDown like inline HTML, lists, atx-style headings or links to external documents, although they do support references to images. But MMLs have features that are not found in MarkDown, such as smartquotes, dividers, poetry indenting and milestones. 
 
-Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation regenerated on demand to facilitate editing.
+Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand to facilitate editing.
 
 #### MML Dialect file
 The MML dialect file describes all the configuarable parts of an MML definition.
@@ -15,9 +15,9 @@ Only a few features are hard-wired into MML. These are:
 3. Quotations are marked by leading "> " at the start of lines, the first of which must start a paragraph. They may nest.
 4. Code sections or preformatted blocks begin with four spaces. Subsequent spaces are preserved.
 
-Everything else is configurable. The MML description file may be an empty string, in which case only the hard-wired features will be recognised, and no properties will be added to them.
+Everything else is configurable. The MML description file may be an empty string, in which case only the paragraphs and sections will be recognised, and no properties will be added to them.
 
-Individual features can also be omitted and will not be processed. For example, omitting "codeblocks" will disable all codeblocks.
+Individual features can also be omitted and will not be processed. For example, omitting "codeblocks" will disable all codeblocks. 
 
 An example MML definition is:
 
@@ -71,5 +71,5 @@ This keyword expects an array of JSON objects, each of which has the standard ta
 This keyword expects an array of JSON objects, which have the standard leftTag, rightTag and prop attributes. LeftTags are recognised only at paragraph start and rightTags only at paragraph end, although they may be preceded or followed by white space (tabs and spaces). Paraformats generate &lt;p&gt; elements in HTML with the prop as the class name.
 
 #### milestones
-Milestones mark positions in the text where some counter changes value, such as a page break. They designate the value of that proerty until the next such break. They are rendered as spans with the class of the "prop" attribute. This keyword expects an array of JSON objects each of which has the standard leftTag, rightTag and prop attributes.
+Milestones mark positions in the text where some counter changes value, such as a page break. They designate the value of that proerty until the next such break. They are rendered as spans with the class of the "prop" attribute. This keyword expects an array of JSON objects each of which has the standard leftTag, rightTag and prop attributes. Milestones are usually formatted with the css property display: none.
 

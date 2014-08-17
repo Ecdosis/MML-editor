@@ -16,13 +16,15 @@ To create the MML-Editor all that is needed is a JSON dialect file and three ele
 
     var editor = new MMLEditor("source","target", opts);
 
+The first and second (and eventually third) arguments are IDs of the elements the panels will replace. The current third argument is a string representation of the dialect file. 
+
 A toolbar will eventually be added above the three panels, which will contain some simple buttons:
 
 1. Save. This sends the HTML representation to the server. The service will may then strip all tags and properties from the text and represent the two separately. Alternatively it may simply store the HTML.
 2. Info. This displays the dialect file by reformatting it as HTML, and laying the result on top of the second panel. Clicking again on Info removes it.
 3. Version. This dropdown menu selects the version of the document for display. Historical documents are divided into layers for internal verions and external versions arising from separate physical documents. In the latter case changing a version will load a different set of page-images.
 
-Since the editor is only invoked to edit a particular document or work it does not need an open button. The user will already have clicked "Edit"on some documentand need only go back or select another feature of the website from the normal CMS menu above.
+Since the editor is only invoked to edit a particular document or work it does not need an "open" button. The user will already have clicked "Edit" on some document, and need only go back or select another feature of the website from the normal CMS menu above.
 
 #### MML Dialect file
 The MML dialect file describes all the configuarable parts of an MML definition.
@@ -71,7 +73,7 @@ Several keywords are used in an MML definition.
 This can be omitted as it is not processed. It provides a short description which will be formatted into HTML for display when the user selects the info button for this dialect.
 
 #### section
-This keyword designates a JSON object whose only key is "prop", the name of the section type
+This keyword designates a JSON object whose only key is "prop", the name of the section type.
 
 #### paragraph
 This contains a single JSON object whose only value may be "prop", which designates the class of all default paragraphs. If the property name is empty or missing no property will be used.

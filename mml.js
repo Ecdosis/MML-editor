@@ -203,7 +203,8 @@ function MMLEditor(source, target, opts) {
                     }
                     if ( j == tag.length )
                     {
-                        if ( tag == "-\n" )
+                        if ( this.opts.softhyphens != undefined 
+                            && this.softhyphens && tag == "-\n" )
                         {
                             text = text.slice(0,i)
                                 +'<span class="soft-hyphen">-</span>'

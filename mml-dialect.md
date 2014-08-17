@@ -8,16 +8,16 @@ Each MML is custom-built for a specific need. This is so that only those codes n
 #### MML Dialect file
 The MML dialect file describes all the configuarable parts of an MML definition.
 
-Only a few features are hard-wired into MML. These are:
+Only two features are hard-wired into MML. These are:
 
 1. Paragraphs are divided by two newlines ("\n\n")
 2. Sections are divided by three newlines ("\n\n\n")
-3. Soft-hyphens."-\n" (hyphen at line-end) is converted into a span whose class name is "soft-hyphen".
 
-Two further features are hard-wired but can be turned off:
+Three further features are hard-wired but can be turned off:
 
 1. Quotations are marked by leading "> " at the start of lines, the first of which must start a paragraph. They may nest.
 2. Code sections or preformatted blocks begin with four spaces. Subsequent spaces are preserved.
+3. 3. Soft-hyphens."-\n" (hyphen at line-end) is converted into a span whose class name is "soft-hyphen".
 
 Everything else is configurable. The MML description file may be an empty string, in which case only the paragraphs and sections will be recognised, and no properties will be added to them.
 
@@ -32,6 +32,7 @@ An example MML definition is:
         "codeblocks": {"prop": ""},
         "quotations": {"prop": ""},
         "smartquotes": true,
+        "softhyphens": true,
         "headings": [{"tag":"=","prop":"h1"},{"tag":"-","prop":"h2"},{"tag":"_","prop":"h3"}],
         "dividers": [{"tag":"-----","prop":"dash"}, {"tag":"--+--","prop":"plus"}],
         "charformats": [{"tag":"*","prop":"italics"},{"tag":"`","prop":"letter-spacing"}],
@@ -61,6 +62,9 @@ This contains a single JSON object whose only attribute is "prop", which specifi
 
 #### smartquotes
 This keyword takes a bare boolean value. If true single and double-quotes will be converted into curly quotes in UniCode. If false they will be left alone. Already curly quotes will be left unchanged.
+
+#### softhyphens
+This keyword also takes a bare boolean value. If true, hyphens at the ends of lines will be replaced by &lt;span class="soft-hyphen"&gt;-&lt;/span&gt;. Currently no special processing for hard-hyphens, that is, when hyphenated words are split over a line, is available, since this requires dictionary lookup to work.
 
 #### headings
 This keyword designates an array of tag defintions. Each definition may contain two keys: "tag" which gives the single character used as a setext underlining to designate headings, and "prop" which is the class of the HTML element that will be created. The name of the HTML element depends on the order. The first heading will be H1, the second H2 up to H6.

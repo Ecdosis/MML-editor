@@ -10,7 +10,7 @@ Only a few features are hard-wired into MML. These are:
 3. Quotations are marked by leading "> " at the start of lines, the first of which must start a paragraph. They may nest.
 4. Code sections or preformatted blocks begin with four spaces. Subsequent spaces are preserved.
 
-Everything else is configurable. The MML description file may be an empty string, in which case the default values described below are used.
+Everything else is configurable. The MML description file may be an empty string, in which case only the hard-wired features will be reognised, and no properties will be added to them.
 
 Individual features can also be omitted and will not be processed. For example, omitting "codeblocks" will disable all codeblocks.
 

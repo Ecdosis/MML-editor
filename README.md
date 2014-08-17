@@ -73,7 +73,7 @@ Several keywords are used in an MML definition.
 This can be omitted as it is not processed. It provides a short description which will be formatted into HTML for display when the user selects the info button for this dialect.
 
 #### section
-This keyword designates a JSON object whose only key is "prop", the name of the section type.
+This keyword designates a JSON object whose only attribute is "prop", the name of the section type.
 
 #### paragraph
 This contains a single JSON object whose only value may be "prop", which designates the class of all default paragraphs. If the property name is empty or missing no property will be used.
@@ -88,10 +88,10 @@ This keyword takes a bare boolean value. If true single and double-quotes will b
 This keyword also takes a bare boolean value. If true, hyphens at the ends of lines will be replaced by &lt;span class="soft-hyphen"&gt;-&lt;/span&gt;. Currently no special processing for hard-hyphens, that is, when hyphenated words are split over a line, is available, since this requires dictionary lookup to work.
 
 #### headings
-This keyword designates an array of tag defintions. Each definition may contain two keys: "tag" which gives the single character used as a setext underlining to designate headings, and "prop" which is the class of the HTML element that will be created. The name of the HTML element depends on the order. The first heading will be H1, the second H2 up to H6.
+This keyword designates an array of tag defintions. Each definition may contain two attributes: "tag" which gives the single character used as a setext underlining to designate headings, and "prop" which is the class of the HTML element that will be created. The name of the HTML element depends on the order. The first heading will be H1, the second H2 up to H6.
 
 #### dividers
-Dividers are separators, usually in the form of a long dash or series of stars. They must be a paragraph on their own (separated by 2 preceding and following newlines). This keyword expects an array of JSON objects, each with the standard tag and prop keys. In this case the "tag" key designates the entire text of the divider, which must match exactly in the source if it is to be recognised. The prop key is used to link to CSS properties which effectively create the divider. All dividers are the same: they consist of a 2x2 &lt;table&gt;, whose class will be value of prop, and the four cells (&lt;td&gt;) have class names &lt;propname&gt;-topleft, -topright, -botleft, -botright.
+Dividers are separators, usually in the form of a long dash or series of stars. They must be a paragraph on their own (separated by 2 preceding and following newlines). This keyword expects an array of JSON objects, each with the standard tag and prop attributes. In this case the "tag" attribute designates the entire text of the divider, which must match exactly in the source if it is to be recognised. The prop attribute is used to link to CSS properties which effectively create the divider. All dividers are the same: they consist of a 2x2 &lt;table&gt;, whose class will be value of prop, and the four cells (&lt;td&gt;) have class names &lt;propname&gt;-topleft, -topright, -botleft, -botright.
 
 #### charformats
 This keyword expects an array of JSON objects, each of which has the standard tag and prop attributes. The tag attibute designates a string, which is usually one character long, and which is repeated at the start and end of the charformatted  text. Each charformat generates one &lt;span&gt;-element with the enclosed text inside, and the class value of the prop attribute. charformats are dropped at line end.

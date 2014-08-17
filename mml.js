@@ -204,7 +204,7 @@ function MMLEditor(source, target, opts) {
                     if ( j == tag.length )
                     {
                         if ( this.opts.softhyphens != undefined 
-                            && this.softhyphens && tag == "-\n" )
+                            && this.opts.softhyphens && tag == "-\n" )
                         {
                             text = text.slice(0,i)
                                 +'<span class="soft-hyphen">-</span>'

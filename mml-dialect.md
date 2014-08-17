@@ -3,7 +3,7 @@
 
 MMLs are based on [Markdown](http://daringfireball.net/projects/markdown/syntax). They are designed to represent historical printed and handwritten documents, to capture their features. Hence MMLs do not support word-processor features of MarkDown like inline HTML, lists, atx-style headings or links to external documents, although they do support references to images. But MMLs have features that are not found in MarkDown, such as smartquotes, dividers, poetry indenting and milestones. 
 
-Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand to facilitate editing.
+Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML document is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand to facilitate editing.
 
 #### MML Dialect file
 The MML dialect file describes all the configuarable parts of an MML definition.

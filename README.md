@@ -6,7 +6,7 @@ MMLs are based on [Markdown](http://daringfireball.net/projects/markdown/syntax)
 Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML document is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand to facilitate editing.
 
 #### Editor
-The MML Editor is a javascript object consisting, eventually, of three panels. 
+The MML Editor is a javascript object that will eventually consist of three panels. The three panels are syncro-scrollable. That is, scrolling any one automatically scrolls the others to the corresponding positions.
 
 1. The leftmost panel is a scrollable series of page-images. 
 2. The second panel contains the editable MML text in a simple textarea. 

@@ -6,8 +6,8 @@
  * The MML diaclet is defined from a JSON opts object.
  * To use it just create one:
  * var editor = new MMLEditor("source","target",opts);
- * @param source the ID of a textarea on the page
- * @param target the ID of an empty div element
+ * @param source the ID of a textarea on the page (no leading "#")
+ * @param target the ID of an empty div element (no leading "#")
  * @param opts an MML dialect description in JSON format, see mml-dialect.md
  */
 function MMLEditor = function(source, target, opts) {
@@ -95,7 +95,7 @@ function MMLEditor = function(source, target, opts) {
             return quote;
     }
     /**
-     * Get a curly openng quote character 
+     * Get a curly opening quote character 
      * @param quote the quote to convert
      * @return the Unicode curly variant
     */
@@ -651,8 +651,8 @@ function MMLEditor = function(source, target, opts) {
     {
         if ( this.changed )
         {
-            var text = $("#source").val();
-            $("#target").html(this.toHTML(text));
+            var text = $("#"+source).val();
+            $("#"+target).html(this.toHTML(text));
             this.changed = false;
             $(".page").css("display","inline");
             var base = 0;
@@ -662,19 +662,19 @@ function MMLEditor = function(source, target, opts) {
                 html_lines[$(this).text()] = $(this).offset().top+base;
             });
             $(".page").css("display","none");
-            $("#source").scroll( function() {
-                // get the position of source
-                // 1. work out scrollTop of source
-                var scrollPos = $("#source").scrollTop();
-                var lineHeight = $("#source").prop("scrollHeight")/num_lines;
-                var linePos = Math.round(scrollPos/lineHeight);
-                // scroll target to that position
-            });
         }
     }
     window.setInterval(function() {this.updateHTML()},300);
     // force update when user modifies the source
-    $("#source").keyup( function(e) {
+    $("#"+source).keyup( function(e) {
         this.changed = true;
+    });
+    $("#"+source).scroll( function() {
+        // get the position of source
+        // 1. work out scrollTop of source
+        var scrollPos = $("#"+source).scrollTop();
+        var lineHeight = $("#"+source).prop("scrollHeight")/num_lines;
+        var linePos = Math.round(scrollPos/lineHeight);
+        // scroll target to that position
     });
 };

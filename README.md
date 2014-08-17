@@ -18,7 +18,7 @@ To create the MML-Editor all that is needed is a JSON dialect file and three ele
 
 The first and second (and eventually third) arguments are IDs of the elements the panels will replace. The current third argument is a string representation of the dialect file. 
 
-A toolbar will eventually be added above the three panels, which will contain some simple buttons:
+The CMS should provide buttons to perform the basic operations of the editor, but the editor itself only has an API to perform these functions:
 
 1. Save. This sends the HTML representation to the server. The service will may then strip all tags and properties from the text and represent the two separately. Alternatively it may simply store the HTML.
 2. Info. This displays the dialect file by reformatting it as HTML, and laying the result on top of the second panel. Clicking again on Info removes it.

@@ -12,9 +12,12 @@ Only a few features are hard-wired into MML. These are:
 
 1. Paragraphs are divided by two newlines ("\n\n")
 2. Sections are divided by three newlines ("\n\n\n")
-3. Soft-hyphens."-\n" (hyphen at line-end) is onverted into a span whose class name is "soft-hyphen".
-4. Quotations are marked by leading "> " at the start of lines, the first of which must start a paragraph. They may nest.
-5. Code sections or preformatted blocks begin with four spaces. Subsequent spaces are preserved.
+3. Soft-hyphens."-\n" (hyphen at line-end) is converted into a span whose class name is "soft-hyphen".
+
+Two further features are hard-wired but can be turned off:
+
+1. Quotations are marked by leading "> " at the start of lines, the first of which must start a paragraph. They may nest.
+2. Code sections or preformatted blocks begin with four spaces. Subsequent spaces are preserved.
 
 Everything else is configurable. The MML description file may be an empty string, in which case only the paragraphs and sections will be recognised, and no properties will be added to them.
 

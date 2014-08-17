@@ -10,7 +10,7 @@
  * @param target the ID of an empty div element (no leading "#")
  * @param opts an MML dialect description in JSON format, see mml-dialect.md
  */
-function MMLEditor = function(source, target, opts) {
+function MMLEditor(source, target, opts) {
     this.changed = true;
     this.quotes = {"'":1,"‘":1,"’":1,'"':1,'”':1,'“':1};
     this.num_lines = 0;
@@ -115,7 +115,7 @@ function MMLEditor = function(source, target, opts) {
      */
     this.isQuote= function( c )
     {
-        return c in quotes;
+        return c in this.quotes;
     }
     /**
      * Is this a plain space char?
@@ -314,7 +314,7 @@ function MMLEditor = function(source, target, opts) {
      * Look for four leading white spaces and format as pre
      * @param text the text of the paragraph
      */
-    this.processCodeBlocks = funtion( input )
+    this.processCodeBlocks = function( input )
     {
         if ( this.opts.codeblocks!=undefined )
         {
@@ -535,7 +535,7 @@ function MMLEditor = function(source, target, opts) {
                         var ms;
                         var c = line.charAt(0);
                         var attr = ' class="'+heads[c]+'" title="'+heads[c]+'"';
-                        if ( isHeading(line,c) )
+                        if ( this.isHeading(line,c) )
                         {
                             // all chars the same
                             res += '<'+tags[heads[c]]+attr+'>'+prev
@@ -570,7 +570,7 @@ function MMLEditor = function(source, target, opts) {
                     var ms = this.isMilestone(line,mss);
                     var ref = line.slice(ms.leftTag.length,this.endPos(line,ms.rightTag));
                     if ( ms.prop="page" )
-                        page_lines[ref] = num_lines;
+                        this.page_lines[ref] = this.num_lines;
                     res += '<span class="'+ms.prop+'">'+ref+'</span>';
                 }
                 else if ( !this.isHeading(line,line.charAt(0)) )
@@ -637,7 +637,7 @@ function MMLEditor = function(source, target, opts) {
         for ( var i=0;i<sections.length;i++ )
         {
             if ( i > 0 )
-                num_lines += 3;
+                this.num_lines += 3;
             html+= '<div class="'+sectionName+'">'
                 +this.processSection(sections[i]);
             html += '</div>';
@@ -656,15 +656,17 @@ function MMLEditor = function(source, target, opts) {
             this.changed = false;
             $(".page").css("display","inline");
             var base = 0;
+            var self = this;
             $(".page").each( function(i) {
                 if ( base==0 && $(this).offset().top < 0 )
                     base = Math.abs($(this).offset().top);
-                html_lines[$(this).text()] = $(this).offset().top+base;
+                self.html_lines[$(this).text()] = $(this).offset().top+base;
             });
             $(".page").css("display","none");
         }
     }
-    window.setInterval(function() {this.updateHTML()},300);
+    var me = this;
+    window.setInterval(function() {me.updateHTML();},300);
     // force update when user modifies the source
     $("#"+source).keyup( function(e) {
         this.changed = true;
@@ -673,7 +675,7 @@ function MMLEditor = function(source, target, opts) {
         // get the position of source
         // 1. work out scrollTop of source
         var scrollPos = $("#"+source).scrollTop();
-        var lineHeight = $("#"+source).prop("scrollHeight")/num_lines;
+        var lineHeight = $("#"+source).prop("scrollHeight")/this.num_lines;
         var linePos = Math.round(scrollPos/lineHeight);
         // scroll target to that position
     });

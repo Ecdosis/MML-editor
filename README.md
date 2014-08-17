@@ -52,7 +52,7 @@ Several keywords are used in an MML definition.
 This can be omitted as it is not processed. It provides a short description which will be formatted into HTML for display when the user selects the info button for this dialect.
 
 #### section
-This keyword designates a JSON object whose only key is "prop",the nameof the section type
+This keyword designates a JSON object whose only key is "prop", the name of the section type
 
 #### paragraph
 This contains a single JSON object whose only value may be "prop", which designates the class of all default paragraphs. If the property name is empty or missing no property will be used.
@@ -73,11 +73,11 @@ This keyword designates an array of tag defintions. Each definition may contain 
 Dividers are separators, usually in the form of a long dash or series of stars. They must be a paragraph on their own (separated by 2 preceding and following newlines). This keyword expects an array of JSON objects, each with the standard tag and prop keys. In this case the "tag" key designates the entire text of the divider, which must match exactly in the source if it is to be recognised. The prop key is used to link to CSS properties which effectively create the divider. All dividers are the same: they consist of a 2x2 &lt;table&gt;, whose class will be value of prop, and the four cells (&lt;td&gt;) have class names &lt;propname&gt;-topleft, -topright, -botleft, -botright.
 
 #### charformats
-This keyword expects an array of JSON objects, each of which has the standard tag and prop attributes. The tag attibute designates a string, which is usually one character long, and which is repeated at the start and end of the charformatted  text. Each charformat generates one &lt;span&gt;element with the enclosed text inside, and the class value of the prop attribute. charformats are dropped at line end.
+This keyword expects an array of JSON objects, each of which has the standard tag and prop attributes. The tag attibute designates a string, which is usually one character long, and which is repeated at the start and end of the charformatted  text. Each charformat generates one &lt;span&gt;-element with the enclosed text inside, and the class value of the prop attribute. charformats are dropped at line end.
 
 #### paraformats
 This keyword expects an array of JSON objects, which have the standard leftTag, rightTag and prop attributes. LeftTags are recognised only at paragraph start and rightTags only at paragraph end, although they may be preceded or followed by white space (tabs and spaces). Paraformats generate &lt;p&gt; elements in HTML with the prop as the class name.
 
 #### milestones
-Milestones mark positions in the text where some counter changes value, such as a page break. They designate the value of that proerty until the next such break. They are rendered as spans with the class of the "prop" attribute. This keyword expects an array of JSON objects each of which has the standard leftTag, rightTag and prop attributes. Milestones are usually formatted with the css property display: none.
+Milestones mark positions in the text where some counter changes value, such as a page break. They designate the value of that property until the next such break. They are rendered as spans with the class of the "prop" attribute. This keyword expects an array of JSON objects, each of which has the standard leftTag, rightTag and prop attributes. Milestones are usually formatted with the css property display: none.
 

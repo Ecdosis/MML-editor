@@ -1,3 +1,6 @@
+### Minimal Markup Languages
+#### Dialect File Definition
+
 The MML dialect file describes all the configuarable parts of an MML definition.
 
 Only a few features are hard-wired into MML. These are:
@@ -10,6 +13,8 @@ Only a few features are hard-wired into MML. These are:
 Everything else is configurable. The MML description file may be an empty string, in which case the default values described below are used.
 
 Individual features can also be omitted and will not be processed. For example, omitting "codeblocks" will disable all codeblocks.
+
+Unlike MarkDown, MMLs do not support inline HTML, lists, atx-style headings or links to external documents, but they do support references to images. The reason is that MMLs are designed to represent historical printed and handwritten documents only, to capture their features, not to serve as a simple word-processor. For that purpose try MarkDown.
 
 An example MML definition is:
 

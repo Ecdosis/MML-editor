@@ -1,4 +1,22 @@
 /**
+ * Remember where we are in a list of pages
+ */
+function RefLoc( ref, loc ) {
+    this.ref = ref;
+    this.loc = loc;
+    this.sort = function( a ) {
+        for (var h = a.length; h = parseInt(h / 2);) {
+            for (var i=h; i<a.length; i++) {
+                var k = a[i];
+                for (var j=i; j>=h && k.loc<a[j-h].loc; j-=h)
+                    a[j] = a[j-h];
+                a[j] = k;
+            }
+        }
+        return a;
+    };
+}
+/**
  * An MML Editor provides 2 or 3 panels which are sync-scrolled.
  * In the first panel there is a succession of page-images.
  * In the second an editable text in a minimal markup language (MML).
@@ -552,11 +570,12 @@ function MMLEditor(source, target, opts) {
                             && this.isMilestone(prev,mss)!=undefined )
                         {
                             var ms = this.isMilestone(prev,mss);
+                            var ref = prev.slice(ms.leftTag.length,
+                                this.endPos(prev,ms.rightTag));
                             if ( ms.prop="page" )
-                                this.page_lines.push(this.num_lines);
+                                this.page_lines.push(new RefLoc(ref,this.num_lines));
                             res += '<span class="'+ms.prop+'">'
-                            +prev.slice(ms.leftTag.length,this.endPos(prev,ms.rightTag))
-                            +'</span>';
+                                +ref+'</span>';
                         }
                         else
                             res += prev+'\n';
@@ -571,7 +590,7 @@ function MMLEditor(source, target, opts) {
                     var ms = this.isMilestone(line,mss);
                     var ref = line.slice(ms.leftTag.length,this.endPos(line,ms.rightTag));
                     if ( ms.prop="page" )
-                        this.page_lines[ref] = this.num_lines;
+                        this.page_lines.push( new RefLoc(ref,this.num_lines);
                     res += '<span class="'+ms.prop+'">'+ref+'</span>';
                 }
                 else if ( !this.isHeading(line,line.charAt(0)) )
@@ -666,6 +685,18 @@ function MMLEditor(source, target, opts) {
             $(".page").css("display","none");
         }
     }
+    this.getSourcePage = function( src )
+    {
+        var scrollPos = src.scrollTop();
+        var lineHeight = src.prop("scrollHeight")/this.num_lines;
+        var linePos = Math.round(scrollPos/lineHeight);
+        var positions = new Array();
+        for ( pageno in this.page_lines )
+        {
+            positions.push(this.page_lines[pageno]);
+        }
+        
+    }
     var me = this;
     window.setInterval(function() {me.updateHTML();},300);
     // force update when user modifies the source
@@ -675,9 +706,7 @@ function MMLEditor(source, target, opts) {
     $("#"+source).scroll( function() {
         // get the position of source
         // 1. work out scrollTop of source
-        var scrollPos = $("#"+source).scrollTop();
-        var lineHeight = $("#"+source).prop("scrollHeight")/this.num_lines;
-        var linePos = Math.round(scrollPos/lineHeight);
+        var location = this.getSourcePage($("#"+source),linePos
         // scroll target to that position
     });
 };

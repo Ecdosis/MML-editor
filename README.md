@@ -5,6 +5,25 @@ MMLs are based on [Markdown](http://daringfireball.net/projects/markdown/syntax)
 
 Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML document is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand to facilitate editing.
 
+#### Editor
+The MML Editor is a javascript object consisting, eventually, of three panels. 
+
+1. The leftmost panel is a scrollable series of page-images. 
+2. The second panel contains the editable MML text in a simple textarea. 
+3. The third contains a HTML preview of the MML text. 
+
+To create the MML-Editor all that is needed is a JSON dialect file and three elements with IDs on a HTML page: two divs (for panels 1 and 3) and a textarea. Also needed is a css file to format the preview. Invocation is like this:
+
+    var editor = new MMLEditor("source","target", opts);
+
+A toolbar will eventually be added above the three panels, which will contain some simple buttons:
+
+1. Save. This sends the HTML representation to the server. The service will may then strip all tags and properties from the text and represent the two separately. Alternatively it may simply store the HTML.
+2. Info. This displays the dialect file by reformatting it as HTML, and laying the result on top of the second panel. Clicking again on Info removes it.
+3. Version. This dropdown menu selects the version of the document for display. Historical documents are divided into layers for internal verions and external versions arising from separate physical documents. In the latter case changing a version will load a different set of page-images.
+
+Since the editor is only invoked to edit a particular document or work it does not need an open button. The user will already have clicked "Edit"on some documentand need only go back or select another feature of the website from the normal CMS menu above.
+
 #### MML Dialect file
 The MML dialect file describes all the configuarable parts of an MML definition.
 

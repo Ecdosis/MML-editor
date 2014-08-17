@@ -590,7 +590,7 @@ function MMLEditor(source, target, opts) {
                     var ms = this.isMilestone(line,mss);
                     var ref = line.slice(ms.leftTag.length,this.endPos(line,ms.rightTag));
                     if ( ms.prop="page" )
-                        this.page_lines.push( new RefLoc(ref,this.num_lines);
+                        this.page_lines.push( new RefLoc(ref,this.num_lines) );
                     res += '<span class="'+ms.prop+'">'+ref+'</span>';
                 }
                 else if ( !this.isHeading(line,line.charAt(0)) )

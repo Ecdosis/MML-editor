@@ -706,7 +706,7 @@ function MMLEditor(source, target, opts) {
         if ( this.num_lines > 0 )
         {
             var scrollPos = tgt.scrollTop();
-            var scrollPos = tgt.height()/2;
+            scrollPos += tgt.height()/2;
             var middle=this.html_lines.length-1;
             for ( var i=0;i<this.html_lines.length;i++ )
             {
@@ -798,7 +798,7 @@ function MMLEditor(source, target, opts) {
     $("#"+source).scroll( 
         (function(self) {
             return function(e) {
-                if (!$("#"+source).is(':animated') && e.originalEvent)
+                if (!$("#"+self.src).is(':animated') && e.originalEvent)
                 {
                     var loc = self.getSourcePage($(this));
                     var parts = loc.split(",");
@@ -830,13 +830,13 @@ function MMLEditor(source, target, opts) {
     $("#"+target).scroll(
         (function(self) {
             return function(e) {
-                if ( !$("#"+target).is(':animated') && e.originalEvent ) 
+                if ( !$("#"+self.target).is(':animated') && e.originalEvent ) 
                 {
                     var loc = self.getHtmlPage($(this));
                     var parts = loc.split(",");
                     var pos;
                     var index = self.findRefIndex(self.page_lines,parts[0]);
-                    var lineHeight = $("#"+source).prop("scrollHeight")/self.num_lines;
+                    var lineHeight = $("#"+self.src).prop("scrollHeight")/self.num_lines;
                     if ( index >= 0 )
                         pos = self.page_lines[index].loc*lineHeight;
                     else
@@ -850,12 +850,12 @@ function MMLEditor(source, target, opts) {
                         pageHeight = $("#"+self.target).prop("scrollHeight")
                             -(self.page_lines[index].loc*lineHeight);
                     pos += Math.round(parseFloat(parts[1])*pageHeight);
-                    var target = $("#"+self.target);
+                    var source = $("#"+self.src);
                     // scrolldown one half-page
-                    pos -= Math.round(target.height()/2);
+                    pos -= Math.round(source.height()/2);
                     if ( pos < 0 )
                         pos = 0;
-                    target.animate({scrollTop: pos}, 20, "linear"); 
+                    source.animate({scrollTop: pos}, 20, "linear"); 
                 }
             }
         })(this)

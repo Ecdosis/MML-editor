@@ -87,7 +87,7 @@ This contains a single JSON object whose only attribute is "prop", which specifi
 This keyword takes a bare boolean value. If true single and double-quotes will be converted into curly quotes in UniCode. If false they will be left alone. Already curly quotes will be left unchanged.
 
 #### softhyphens
-This keyword also takes a bare boolean value. If true, hyphens at the ends of lines will be replaced by &lt;span class="soft-hyphen"&gt;-&lt;/span&gt;. When hyphens marked with thepropery "soft-hyphen" are submitted to the server, it can check whether they really are soft (whether the two halves are not words in the relevant dictionary or are in the hard hyphens exception list. If they fail both of these tests the property is changed to "hard-hyphen" when it is returned for updating.
+This keyword also takes a bare boolean value. If true, hyphens at the ends of lines will be replaced by &lt;span class="soft-hyphen"&gt;-&lt;/span&gt;. When hyphens marked with the property "soft-hyphen" are submitted to the server, it checks whether they really are soft (whether the two halves are not words in the relevant dictionary or are in the hard hyphens exceptions list). If they fail both of these tests the property is changed to "hard-hyphen" when it is returned for updating.
 
 #### headings
 This keyword designates an array of tag defintions. Each definition may contain two attributes: "tag" which gives the single character used as a setext underlining to designate headings, and "prop" which is the class of the HTML element that will be created. The name of the HTML element depends on the order. The first heading will be H1, the second H2 up to H6.

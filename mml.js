@@ -1,20 +1,11 @@
 /**
  * Remember where we are in a list of pages
+ * @param ref the value of the milestone, e.g. "4" for page 4
+ * @param loc the location in pixels or whatever units where the ms starts
  */
-function RefLoc( ref, loc ) {
+function RefLoc( ref, loc) {
     this.ref = ref;
     this.loc = loc;
-    this.sort = function( a ) {
-        for (var h = a.length; h = parseInt(h / 2);) {
-            for (var i=h; i<a.length; i++) {
-                var k = a[i];
-                for (var j=i; j>=h && k.loc<a[j-h].loc; j-=h)
-                    a[j] = a[j-h];
-                a[j] = k;
-            }
-        }
-        return a;
-    };
 }
 /**
  * An MML Editor provides 2 or 3 panels which are sync-scrolled.
@@ -36,6 +27,7 @@ function MMLEditor(source, target, opts) {
     this.formatted = false;
     this.page_lines = new Array();
     this.html_lines = new Array();
+    this.previous_refs = new Array();
     this.target = target;
     this.src = source;
     /**
@@ -46,7 +38,7 @@ function MMLEditor(source, target, opts) {
     this.peek = function( stack )
     {
         return (stack.length==0)?undefined:stack[stack.length-1];
-    }
+    };
     /**
      * Make a generic divider. It is a table with four cells.
      * @param prop the class name of the table and cell properties
@@ -77,7 +69,7 @@ function MMLEditor(source, target, opts) {
         sb += "</td></tr>";
         sb += "</table>";
         return sb;
-    }
+    };
     /**
      * Process a paragraph for possible dividers
      * @param text the text to process
@@ -99,7 +91,7 @@ function MMLEditor(source, target, opts) {
             }
         }
         return text;
-    }
+    };
     /**
      * Get a curly close quote character 
      * @param quote the quote to convert
@@ -113,7 +105,7 @@ function MMLEditor(source, target, opts) {
             return '”';
         else
             return quote;
-    }
+    };
     /**
      * Get a curly opening quote character 
      * @param quote the quote to convert
@@ -127,7 +119,7 @@ function MMLEditor(source, target, opts) {
             return '“';
         else
             return quote;
-    }
+    };
     /**
      * Is this a curly or straight quote char?
      * @param c the quote to test
@@ -136,7 +128,7 @@ function MMLEditor(source, target, opts) {
     this.isQuote= function( c )
     {
         return c in this.quotes;
-    }
+    };
     /**
      * Is this a plain space char?
      * @param c the char to test
@@ -145,7 +137,7 @@ function MMLEditor(source, target, opts) {
     this.isSpace = function( c )
     {
         return c == '\t'||c==' ';
-    }
+    };
     /**
      * Is this an opening bracket of some kind?
      * @param c the char to test
@@ -154,7 +146,7 @@ function MMLEditor(source, target, opts) {
     this.isOpeningBracket = function(c)
     {
         return c=='['||c=='('||c=='{'||c=='<';
-    }
+    };
     /**
      * Specifically test for an opening quote char
      * @param c the char to test
@@ -163,7 +155,7 @@ function MMLEditor(source, target, opts) {
     this.isOpeningQuote = function(c)
     {
         return c=="‘"||c=='“';
-    }
+    };
     /**
      * Convert smart quotes as fast as possible. Do this first.
      * @param text the text of a paragraph
@@ -188,7 +180,7 @@ function MMLEditor(source, target, opts) {
             }
         }
         return text;         
-    }
+    };
     /**
      * Search for and replace all character formats in the paragraph
      * @param text the text of the paragraph
@@ -201,9 +193,9 @@ function MMLEditor(source, target, opts) {
             var cfmts = this.opts.charformats;
             var tags = new Array();
             var stack = new Array();
-            for ( var i=0;i<cfmts.length;i++ )
+            for ( var k=0;k<cfmts.length;k++ )
             {
-                var cfmt = cfmts[i];
+                var cfmt = cfmts[k];
                 if ( cfmt.tag != undefined )
                     tags[cfmt.tag] = (cfmt.prop!=undefined)?cfmt.prop:cfmt.tag;
             }
@@ -253,7 +245,7 @@ function MMLEditor(source, target, opts) {
         }
         // else do nothing
         return text;
-    }
+    };
     /**
      * Find start of tag after leading white space
      * @param text the text to search
@@ -269,7 +261,7 @@ function MMLEditor(source, target, opts) {
             return i;
         else
             return -1;
-    }
+    };
     /**
      * Find the last instance of tag before trailing white space
      * @param text the text to search
@@ -298,7 +290,7 @@ function MMLEditor(source, target, opts) {
             }
         }
         return (j==-1)?i+1:-1;
-    }
+    };
     /**
      * Scan the start and end of the paragraph for defined para formats.
      * @param text the text to of the paragraph 
@@ -330,7 +322,7 @@ function MMLEditor(source, target, opts) {
             }
         }
         return text;
-    }
+    };
     /**
      * Look for four leading white spaces and format as pre
      * @param text the text of the paragraph
@@ -372,7 +364,7 @@ function MMLEditor(source, target, opts) {
         else
             text = input;
         return text;
-    }
+    };
     /**
      * Get the quote depth of the current line
      * @paramline the line to test for leading >s
@@ -408,7 +400,7 @@ function MMLEditor(source, target, opts) {
                 break;
         }
         return depth;
-    }
+    };
     /**
      * Strip the leading quotations from a line
      * @param line
@@ -428,7 +420,7 @@ function MMLEditor(source, target, opts) {
             }
         }
         return line.slice(i);
-    }
+    };
     /**
      * Quotations are lines starting with "> "
      * @param text the text to scan for quotations and convert
@@ -438,6 +430,7 @@ function MMLEditor(source, target, opts) {
     {
         if ( this.opts.quotations != undefined )
         {
+            var old;
             var res = "";
             var attr = (this.opts.quotations.prop!=undefined
                 &&this.opts.quotations.prop.length>0)
@@ -459,7 +452,7 @@ function MMLEditor(source, target, opts) {
                         }
                         else if ( depth < this.peek(stack) )
                         {
-                            var old = stack.pop();
+                            old = stack.pop();
                             while ( old != undefined && old>depth )
                             {
                                 res +="</blockquote>";
@@ -470,10 +463,10 @@ function MMLEditor(source, target, opts) {
                 }
                 res += this.stripQuotations(lines[i])+"\n";
             }
-            var old = this.peek(stack);
+            old = this.peek(stack);
             while ( old != undefined && old > 0 )
             {
-                var old = stack.pop();
+                old = stack.pop();
                 if ( old != undefined )
                     res +="</blockquote>";
             }
@@ -483,7 +476,7 @@ function MMLEditor(source, target, opts) {
                 this.formatted = true;
         }
         return text;
-    }
+    };
     /**
      * Does the given line define a heading for the line above?
      * @param line the line to test - should be all the same character
@@ -499,7 +492,7 @@ function MMLEditor(source, target, opts) {
                 break;  
         }
         return j == line.length;
-    }
+    };
     /**
      * Is the current line a milestone?
      * @para, line the line to test
@@ -517,7 +510,7 @@ function MMLEditor(source, target, opts) {
                 return ms;
         }
         return undefined;
-    }
+    };
     /**
      * Process setext type headings (we don't do atx).Oh, and do milestones.
      * @param text the text to give headings to
@@ -527,12 +520,13 @@ function MMLEditor(source, target, opts) {
     {
         if ( this.opts.headings !=undefined )
         {
+            var i,ms,line;
             var res = "";
             var mss = (this.opts.milestones!=undefined&&this.opts.milestones.length>0)
                 ?this.opts.milestones:undefined;
             var heads = new Array();
             var tags = new Array();
-            for ( var i=0;i<this.opts.headings.length;i++ )
+            for ( i=0;i<this.opts.headings.length;i++ )
             {
                 if ( this.opts.headings[i].prop != undefined 
                     && this.opts.headings[i].tag != undefined )
@@ -542,9 +536,9 @@ function MMLEditor(source, target, opts) {
                 }
             }
             var lines = text.split("\n");
-            for ( var i=0;i<lines.length;i++ )
+            for ( i=0;i<lines.length;i++ )
             {
-                var line = lines[i];
+                line = lines[i];
                 if ( i > 0 )
                     this.num_lines++;
                 if ( i>0 && line.length > 0 )
@@ -553,7 +547,6 @@ function MMLEditor(source, target, opts) {
                     if ( line.charAt(0) in heads )
                     {
                         var j = 0;
-                        var ms;
                         var c = line.charAt(0);
                         var attr = ' class="'+heads[c]+'" title="'+heads[c]+'"';
                         if ( this.isHeading(line,c) )
@@ -571,10 +564,10 @@ function MMLEditor(source, target, opts) {
                         if ( mss != undefined 
                             && this.isMilestone(prev,mss)!=undefined )
                         {
-                            var ms = this.isMilestone(prev,mss);
+                            ms = this.isMilestone(prev,mss);
                             var ref = prev.slice(ms.leftTag.length,
                                 this.endPos(prev,ms.rightTag));
-                            if ( ms.prop="page" )
+                            if ( ms.prop=="page" )
                                 this.page_lines.push(new RefLoc(ref,this.num_lines));
                             res += '<span class="'+ms.prop+'">'
                                 +ref+'</span>';
@@ -586,10 +579,10 @@ function MMLEditor(source, target, opts) {
             }
             if ( lines[lines.length-1].length > 0 )
             {
-                var line = lines[lines.length-1];
+                line = lines[lines.length-1];
                 if ( mss != undefined && this.isMilestone(line,mss)!=undefined )
                 {
-                    var ms = this.isMilestone(line,mss);
+                    ms = this.isMilestone(line,mss);
                     var ref = line.slice(ms.leftTag.length,this.endPos(line,ms.rightTag));
                     if ( ms.prop="page" )
                         this.page_lines.push( new RefLoc(ref,this.num_lines) );
@@ -601,7 +594,7 @@ function MMLEditor(source, target, opts) {
             text = res;
         }
         return text;
-    }
+    };
     /**
      * Process an entire paragraph
      * @param text the text to process
@@ -625,7 +618,7 @@ function MMLEditor(source, target, opts) {
         if ( !this.formatted && text.length > 0 )
             text = '<p'+attr+'>'+text+'</p>';
         return text;
-    }
+    };
     /**
      * Process all the paras in a section
      * @param section the text of the section
@@ -643,7 +636,7 @@ function MMLEditor(source, target, opts) {
                 html += this.processPara(paras[i]);
         }
         return html;
-    }
+    };
     /**
      * Convert the MML text into HTML
      * @param text the text to convert
@@ -665,7 +658,7 @@ function MMLEditor(source, target, opts) {
             html += '</div>';
         }
         return html;
-    }
+    };
     /**
      * Check if we need to update the HTML. Gets called repeatedly.
      */
@@ -673,6 +666,7 @@ function MMLEditor(source, target, opts) {
     {
         if ( this.changed )
         {
+            this.num_lines = 0;
             var text = $("#"+source).val();
             $("#"+target).html(this.toHTML(text));
             this.changed = false;
@@ -682,11 +676,24 @@ function MMLEditor(source, target, opts) {
             $(".page").each( function(i) {
                 if ( base==0 && $(this).offset().top < 0 )
                     base = Math.abs($(this).offset().top);
-                self.html_lines[$(this).text()] = $(this).offset().top+base;
+                self.html_lines.push(new RefLoc($(this).text(),$(this).offset().top+base));
             });
             $(".page").css("display","none");
         }
-    }
+    };
+    /**
+     * Find the index of the RefLoc in an array
+     * @param ref the reference value
+     * @return the index of that value in the array or -1
+     */
+    this.findRefIndex = function( array, ref ) {
+        for ( var i=0;i<array.length;i++ )
+        {
+            if ( array[i].ref == ref )
+                return i;
+        }
+        return -1;
+    };
     /**
      * Get the source page number currently in view and the line-number 
      * of the central line.
@@ -694,27 +701,33 @@ function MMLEditor(source, target, opts) {
      */
     this.getSourcePage = function( src )
     {
-        var scrollPos = src.scrollTop()+src.height()/2;
-        var lineHeight = src.prop("scrollHeight")/this.num_lines;
-        var linePos = Math.round(scrollPos/lineHeight);
-        // find page after which linePos occurs
-        var top = 0;
-        var bottom = this.page_lines.length-1;
-        var middle=0;
-        while ( top <= bottom )
+        if ( this.num_lines > 0 )
         {
-            middle = Math.floor((bottom+top)/2);
-            if ( linePos >= this.page_lines[middle+1].loc )
-                top = middle+1;
-            else if ( linePos < this.page_lines[middle].loc )
-                bottom = middle-1;
-            else
-                break;
+            var scrollPos = src.scrollTop();
+            scrollPos += src.height()/2;
+            var lineHeight = src.prop("scrollHeight")/this.num_lines;
+            var linePos = Math.round(scrollPos/lineHeight);
+            // find page after which linePos occurs
+            var top = 0;
+            var bottom = this.page_lines.length-1;
+            var middle=0;
+            while ( top <= bottom )
+            {
+                middle = Math.floor((bottom+top)/2);
+                if ( linePos >= this.page_lines[middle+1].loc )
+                    top = middle+1;
+                else if ( linePos < this.page_lines[middle].loc )
+                    bottom = middle-1;
+                else
+                    break;
+            }
+            var linesOnPage = this.page_lines[middle+1].loc-this.page_lines[middle].loc;
+            var fraction = (linePos-this.page_lines[middle].loc)/linesOnPage;
+            return this.page_lines[middle].ref+","+fraction;
         }
-        var linesOnPage = this.page_lines[middle+1].loc-this.page_lines[middle].loc;
-        var fraction = (linePos-this.page_lines[middle].loc)*lineHeight;
-        return this.page_lines[middle].ref+","+fraction;
-    }
+        else
+            return "0,0";
+    };
     window.setInterval(
         (function(self) {
             return function() {
@@ -735,9 +748,25 @@ function MMLEditor(source, target, opts) {
             return function() {
                 var loc = self.getSourcePage($(this));
                 var parts = loc.split(",");
-                var loc = self.html_lines[parts[0]]+parts[1];
+                var pos;
+                var index = self.findRefIndex(self.html_lines,parts[0]);
+                if ( index >= 0 )
+                    pos = self.html_lines[index].loc;
+                else
+                    pos = 0;
+                var pageHeight;
+                if ( index < self.html_lines.length-1)
+                    pageHeight = self.html_lines[index+1].loc-pos;
+                else
+                    pageHeight = $("#"+self.target).prop("scrollHeight")
+                        -self.html_lines[index].loc;
+                pos += Math.round(parseFloat(parts[1])*pageHeight);
                 var target = $("#"+self.target);
-                target.scrollTo(Math.round(loc));
+                // scrolldown one half-page
+                pos -= Math.round(target.height()/2);
+                if ( pos < 0 )
+                    pos = 0;
+                target.animate({scrollTop: pos}, 100, "linear");
             }
         })(this)
     );

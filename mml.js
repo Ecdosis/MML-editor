@@ -512,7 +512,7 @@ function MMLEditor(source, target, opts) {
         return undefined;
     };
     /**
-     * Process setext type headings (we don't do atx).Oh, and do milestones.
+     * Process setext type headings (we don't do atx). Oh, and do milestones.
      * @param text the text to give headings to
      * @return the possibly modified text
      */
@@ -694,10 +694,45 @@ function MMLEditor(source, target, opts) {
         }
         return -1;
     };
+    this.getHtmlPage = function( tgt )
+    {
+        if ( this.num_lines > 0 )
+        {
+            var scrollPos = tgt.scrollTop();
+            var scrollPos = tgt.height()/2;
+            var middle=this.html_lines.length-1;
+            for ( var i=0;i<this.html_lines.length;i++ )
+            {
+                if ( scrollPos < this.html_lines[i].loc )
+                {
+                    middle = i-1;
+                    break;
+                }
+            }
+            var pixelsOnPage;
+            if ( middle == -1 )
+            {
+                pixelsOnPage = this.html_lines[0].loc;
+            }
+            else if ( middle == this.html_lines.length-1)
+            {
+                pixelsOnPage = tgt.prop('scrollHeight')-this.html_lines[middle].loc;
+            }  
+            else
+            {
+                var nextPageStart = this.html_lines[middle+1].loc;
+                pixelsOnPage = nextPageStart-this.html_lines[middle].loc;
+            }              
+            var fraction = (scrollPos-this.html_lines[middle].loc)/pixelsOnPage;
+            return this.html_lines[middle].ref+","+fraction;
+        }
+    };
     /**
      * Get the source page number currently in view and the line-number 
      * of the central line.
      * @param src the jQuery textarea element
+     * @return a string being the ref of the page, comma, and 
+     * fraction of page in view
      */
     this.getSourcePage = function( src )
     {
@@ -705,11 +740,10 @@ function MMLEditor(source, target, opts) {
         {
             var scrollPos = src.scrollTop();
             scrollPos += src.height()/2;
+            // convert scrollPos to lines
             var lineHeight = src.prop("scrollHeight")/this.num_lines;
             var linePos = Math.round(scrollPos/lineHeight);
             // find page after which linePos occurs
-            var top = 0;
-            var bottom = this.page_lines.length-1;
             var middle=this.page_lines.length-1;
             for ( var i=0;i<this.page_lines.length;i++ )
             {
@@ -719,7 +753,6 @@ function MMLEditor(source, target, opts) {
                     break;
                 }
             }
-            var nextPageStart;
             var linesOnPage;
             if ( middle == -1 )
             {
@@ -757,28 +790,43 @@ function MMLEditor(source, target, opts) {
     );
     $("#"+source).scroll( 
         (function(self) {
-            return function() {
-                var loc = self.getSourcePage($(this));
-                var parts = loc.split(",");
-                var pos;
-                var index = self.findRefIndex(self.html_lines,parts[0]);
-                if ( index >= 0 )
-                    pos = self.html_lines[index].loc;
+            return function(e) {
+                if (!$("#"+source).is(':animated') && e.originalEvent)
+                {
+                    var loc = self.getSourcePage($(this));
+                    var parts = loc.split(",");
+                    var pos;
+                    var index = self.findRefIndex(self.html_lines,parts[0]);
+                    if ( index >= 0 )
+                        pos = self.html_lines[index].loc;
+                    else
+                        pos = 0;
+                    var pageHeight;
+                    if ( index == -1 )
+                        pageHeight = 0;
+                    else if ( index < self.html_lines.length-1)
+                        pageHeight = self.html_lines[index+1].loc-pos;
+                    else
+                        pageHeight = $("#"+self.target).prop("scrollHeight")
+                            -self.html_lines[index].loc;
+                    pos += Math.round(parseFloat(parts[1])*pageHeight);
+                    var target = $("#"+self.target);
+                    // scrolldown one half-page
+                    pos -= Math.round(target.height()/2);
+                    if ( pos < 0 )
+                        pos = 0;
+                    target.animate({scrollTop: pos}, 20, "linear"); 
+                }
+            }
+        })(this)
+    );
+    $("#"+target).scroll(
+        (function(self) {
+            return function(e) {
+                if ( !$("#"+target).is(':animated') && e.originalEvent) 
+                    console.log("not animated");
                 else
-                    pos = 0;
-                var pageHeight;
-                if ( index < self.html_lines.length-1)
-                    pageHeight = self.html_lines[index+1].loc-pos;
-                else
-                    pageHeight = $("#"+self.target).prop("scrollHeight")
-                        -self.html_lines[index].loc;
-                pos += Math.round(parseFloat(parts[1])*pageHeight);
-                var target = $("#"+self.target);
-                // scrolldown one half-page
-                pos -= Math.round(target.height()/2);
-                if ( pos < 0 )
-                    pos = 0;
-                target.animate({scrollTop: pos}, 50, "linear");
+                    console.log("animated");
             }
         })(this)
     );

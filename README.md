@@ -22,14 +22,14 @@ The CMS should provide buttons to perform the basic operations of the editor, bu
 
 1. Save. This sends the HTML representation to the server. The service will may then strip all tags and properties from the text and represent the two separately. Alternatively it may simply store the HTML.
 2. Info. This displays the dialect file by reformatting it as HTML, and laying the result on top of the second panel. Clicking again on Info removes it.
-3. Version. This dropdown menu selects the version of the document for display. Historical documents are divided into layers for internal verions and external versions arising from separate physical documents. In the latter case changing a version will load a different set of page-images.
-4. New Layer or version. Clicking this button will create a form to replace the central panel. The form will allow the specification of basic metadata about the new layer or version. Initially the layer will be a copy of another layer. Clicking the submitbutton on the form will close the form and replace it with the MML text again.
+3. Version. This dropdown menu selects the version of the document for display. Historical documents are divided into layers for internal versions and external versions arising from separate physical documents. In the latter case changing a version will load a different set of page-images.
+4. New Layer or version. Clicking this button will create a form to replace the central panel. The form will allow the specification of basic metadata about the new layer or version. Initially the layer will be a copy of another layer. Clicking the submit button on the form will close the form and replace it with the MML text again.
 5. Delete layer or version. This will completely remove a layer or version from the document.
 
 Since the editor is only invoked to edit a particular document or work it does not need an "open" button. The user will already have clicked "Edit" on some document, and need only go back or select another feature of the website from the normal CMS menu above.
 
 #### MML Dialect file
-The MML dialect file describes all the configuarable parts of an MML definition.
+The MML dialect file describes all the configurable parts of an MML definition.
 
 Only two features are hard-wired into MML. These are:
 

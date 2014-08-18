@@ -36,6 +36,8 @@ function MMLEditor(source, target, opts) {
     this.formatted = false;
     this.page_lines = new Array();
     this.html_lines = new Array();
+    this.target = target;
+    this.src = source;
     /**
      * This should be a function of Array
      * @param the Array to test
@@ -685,28 +687,58 @@ function MMLEditor(source, target, opts) {
             $(".page").css("display","none");
         }
     }
+    /**
+     * Get the source page number currently in view and the line-number 
+     * of the central line.
+     * @param src the jQuery textarea element
+     */
     this.getSourcePage = function( src )
     {
-        var scrollPos = src.scrollTop();
+        var scrollPos = src.scrollTop()+src.height()/2;
         var lineHeight = src.prop("scrollHeight")/this.num_lines;
         var linePos = Math.round(scrollPos/lineHeight);
-        var positions = new Array();
-        for ( pageno in this.page_lines )
+        // find page after which linePos occurs
+        var top = 0;
+        var bottom = this.page_lines.length-1;
+        var middle=0;
+        while ( top <= bottom )
         {
-            positions.push(this.page_lines[pageno]);
+            middle = Math.floor((bottom+top)/2);
+            if ( linePos >= this.page_lines[middle+1].loc )
+                top = middle+1;
+            else if ( linePos < this.page_lines[middle].loc )
+                bottom = middle-1;
+            else
+                break;
         }
-        
+        var linesOnPage = this.page_lines[middle+1].loc-this.page_lines[middle].loc;
+        var fraction = (linePos-this.page_lines[middle].loc)*lineHeight;
+        return this.page_lines[middle].ref+","+fraction;
     }
-    var me = this;
-    window.setInterval(function() {me.updateHTML();},300);
+    window.setInterval(
+        (function(self) {
+            return function() {
+                self.updateHTML();
+            }
+        })(this),300
+    );
     // force update when user modifies the source
-    $("#"+source).keyup( function(e) {
-        this.changed = true;
-    });
-    $("#"+source).scroll( function() {
-        // get the position of source
-        // 1. work out scrollTop of source
-        var location = this.getSourcePage($("#"+source),linePos
-        // scroll target to that position
-    });
+    $("#"+source).keyup( 
+        (function(self) {
+            return function() {
+                self.changed = true;
+            }
+        })(this)
+    );
+    $("#"+source).scroll( 
+        (function(self) {
+            return function() {
+                var loc = self.getSourcePage($(this));
+                var parts = loc.split(",");
+                var loc = self.html_lines[parts[0]]+parts[1];
+                var target = $("#"+self.target);
+                target.scrollTo(Math.round(loc));
+            }
+        })(this)
+    );
 };

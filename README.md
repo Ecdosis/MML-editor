@@ -3,7 +3,7 @@
 
 MMLs are based on [Markdown](http://daringfireball.net/projects/markdown/syntax). They are designed to represent historical printed and handwritten documents, to capture their features. Hence MMLs do not support word-processor features of MarkDown like inline HTML, lists, atx-style headings or links to external documents, although they do support references to images. But MMLs have features that are not found in MarkDown, such as smartquotes, dividers, soft-hyphens, poetry indenting and milestones. 
 
-Each MML is custom-built for a specific need. This is so that only those codes needed for a project are defined and used, and only minimal tag names need be defined. An MML document is not normally stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand to facilitate editing.
+Each MML is custom-built for a specific need. This is so that only those tags needed for a specific project are defined and used, and for these only minimal names need be defined. They are usually single characters, but may be longer. Although each encoding scheme is 'non-standard', this does not matter, since the MML encoding is not stored. Rather its conversion into HTML, or a derivation of it is, and the MML representation is regenerated on demand only to facilitate editing.
 
 #### Editor
 The MML Editor is a javascript object that will eventually consist of three panels. The three panels are syncro-scrollable. That is, scrolling any one automatically scrolls the others to the corresponding positions.

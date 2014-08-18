@@ -694,6 +694,13 @@ function MMLEditor(source, target, opts) {
         }
         return -1;
     };
+    /**
+     * Get the target page number currently in view and the proportion 
+     * of the page visible.
+     * @param tgt the jQuery div object containing the preview
+     * @return a string being the ref of the page, comma, and 
+     * fraction of page in view
+     */
     this.getHtmlPage = function( tgt )
     {
         if ( this.num_lines > 0 )
@@ -823,10 +830,33 @@ function MMLEditor(source, target, opts) {
     $("#"+target).scroll(
         (function(self) {
             return function(e) {
-                if ( !$("#"+target).is(':animated') && e.originalEvent) 
-                    console.log("not animated");
-                else
-                    console.log("animated");
+                if ( !$("#"+target).is(':animated') && e.originalEvent ) 
+                {
+                    var loc = self.getHtmlPage($(this));
+                    var parts = loc.split(",");
+                    var pos;
+                    var index = self.findRefIndex(self.page_lines,parts[0]);
+                    var lineHeight = $("#"+source).prop("scrollHeight")/self.num_lines;
+                    if ( index >= 0 )
+                        pos = self.page_lines[index].loc*lineHeight;
+                    else
+                        pos = 0;
+                    var pageHeight;
+                    if ( index == -1 )
+                        pageHeight = 0;
+                    else if ( index < self.page_lines.length-1)
+                        pageHeight = (self.page_lines[index+1].loc*lineHeight)-pos;
+                    else
+                        pageHeight = $("#"+self.target).prop("scrollHeight")
+                            -(self.page_lines[index].loc*lineHeight);
+                    pos += Math.round(parseFloat(parts[1])*pageHeight);
+                    var target = $("#"+self.target);
+                    // scrolldown one half-page
+                    pos -= Math.round(target.height()/2);
+                    if ( pos < 0 )
+                        pos = 0;
+                    target.animate({scrollTop: pos}, 20, "linear"); 
+                }
             }
         })(this)
     );

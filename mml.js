@@ -710,18 +710,30 @@ function MMLEditor(source, target, opts) {
             // find page after which linePos occurs
             var top = 0;
             var bottom = this.page_lines.length-1;
-            var middle=0;
-            while ( top <= bottom )
+            var middle=this.page_lines.length-1;
+            for ( var i=0;i<this.page_lines.length;i++ )
             {
-                middle = Math.floor((bottom+top)/2);
-                if ( linePos >= this.page_lines[middle+1].loc )
-                    top = middle+1;
-                else if ( linePos < this.page_lines[middle].loc )
-                    bottom = middle-1;
-                else
+                if ( linePos < this.page_lines[i].loc )
+                {
+                    middle = i-1;
                     break;
+                }
             }
-            var linesOnPage = this.page_lines[middle+1].loc-this.page_lines[middle].loc;
+            var nextPageStart;
+            var linesOnPage;
+            if ( middle == -1 )
+            {
+                linesOnPage = this.page_lines[0].loc;
+            }
+            else if ( middle == this.page_lines.length-1)
+            {
+                linesOnPage = this.num_lines-this.page_lines[middle].loc;
+            }  
+            else
+            {
+                var nextPageStart = this.page_lines[middle+1].loc;
+                linesOnPage = nextPageStart-this.page_lines[middle].loc;
+            }              
             var fraction = (linePos-this.page_lines[middle].loc)/linesOnPage;
             return this.page_lines[middle].ref+","+fraction;
         }
@@ -766,7 +778,7 @@ function MMLEditor(source, target, opts) {
                 pos -= Math.round(target.height()/2);
                 if ( pos < 0 )
                     pos = 0;
-                target.animate({scrollTop: pos}, 100, "linear");
+                target.animate({scrollTop: pos}, 50, "linear");
             }
         })(this)
     );

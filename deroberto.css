@@ -12,6 +12,7 @@ h1,h2 {text-align:center }
 .italics { font-style: italic}
 .small-caps { font-variant: small-caps}
 .soft-hyphen { display:none }
+.hard-hyphen { display:inline }
 /* dividers */
 /* centered plus divider */
 .plus-lefttop { border-right: 1px solid; border-bottom:1px solid; width: 70px; height: 5px }

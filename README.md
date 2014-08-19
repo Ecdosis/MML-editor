@@ -68,7 +68,7 @@ Several keywords are used in an MML definition.
 1. prop - this keyword designates the name of the property marked up by the tag to which it is bound. For example, specifying a charformat "italics" with the tag "*" means that HTML spans will be created with the class and title value "italics". When saved, the property value is the only stored attribute of that text-span.
 2. tag - the character string (usually just one character) which is used to define the property in MML. It may be a repeatable code like *italics* or something like a setext underlining
 3. leftTag - used instead of tag when distinct left and right tags are needed.
-4. righttag the right hand version of the tag in the text
+4. rightTag the right hand version of the tag in the text
 
 ### Keywords
 #### description

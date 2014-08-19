@@ -27,7 +27,6 @@ function MMLEditor(source, target, opts) {
     this.formatted = false;
     this.page_lines = new Array();
     this.html_lines = new Array();
-    this.previous_refs = new Array();
     this.target = target;
     this.src = source;
     /**
@@ -667,6 +666,8 @@ function MMLEditor(source, target, opts) {
         if ( this.changed )
         {
             this.num_lines = 0;
+            this.page_lines = new Array();
+            this.html_lines = new Array();
             var text = $("#"+source).val();
             $("#"+target).html(this.toHTML(text));
             this.changed = false;
@@ -854,7 +855,8 @@ function MMLEditor(source, target, opts) {
     $("#"+source).scroll( 
         (function(self) {
             return function(e) {
-                if (!$("#"+self.src).is(':animated') && e.originalEvent)
+                // prevent feedback
+                if ( !$("#"+self.src).data("noscroll") )
                 {
                     var loc = self.getSourcePage($(this));
                     var parts = loc.split(",");
@@ -880,14 +882,18 @@ function MMLEditor(source, target, opts) {
                         pos = 0;
                     target[0].scrollTop = pos; 
                 }
+		else
+                    $("#"+self.src).data("noscroll",false);
             }
         })(this)
     );
     $("#"+target).scroll(
         (function(self) {
             return function(e) {
-                if ( !$("#"+self.target).is(':animated') && e.originalEvent ) 
+                // prevent feedback
+                if ( !$("#"+self.target).data("noscroll") ) 
                 {
+                    $("#"+self.src).data("noscroll",true);
                     var loc = self.getHtmlPage($(this));
                     var parts = loc.split(",");
                     var pos;
@@ -913,6 +919,8 @@ function MMLEditor(source, target, opts) {
                         pos = 0;
                     source[0].scrollTop = pos; 
                 }
+		else
+                    $("#"+self.target).data("noscroll",false);
             }
         })(this)
     );

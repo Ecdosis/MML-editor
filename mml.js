@@ -878,7 +878,7 @@ function MMLEditor(source, target, opts) {
                     pos -= Math.round(target.height()/2);
                     if ( pos < 0 )
                         pos = 0;
-                    target.animate({scrollTop: pos}, 20, "linear"); 
+                    target[0].scrollTop = pos; 
                 }
             }
         })(this)
@@ -911,7 +911,7 @@ function MMLEditor(source, target, opts) {
                     pos -= Math.round(source.height()/2);
                     if ( pos < 0 )
                         pos = 0;
-                    source.animate({scrollTop: pos}, 20, "linear"); 
+                    source[0].scrollTop = pos; 
                 }
             }
         })(this)

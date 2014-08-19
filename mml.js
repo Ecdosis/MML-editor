@@ -683,11 +683,11 @@ function MMLEditor(source, target, opts) {
     };
     /**
      * Find the index of the highest value in the refarray 
-     * less than the given value
+     * less than or equal to the given value
      * @param list a sorted array of RefLocs
      * @param value the value of loc to search for
-     * @return -1 if no element is less than or the index of the highest 
-     * element in refarray that is
+     * @return -1 if no element is less than or equal to, or the index  
+     * of the highest element in refarray that is
      */
     this.findHighestIndex = function( list, value )
     {
@@ -746,9 +746,14 @@ function MMLEditor(source, target, opts) {
             var scrollPos = tgt.scrollTop();
             var scrollHt = tgt.prop("scrollHeight");
             var tgtHeight = tgt.height();
-            var maximum = scrollHt-tgtHeight;
+            var padBot = tgt.css("padding-bottom");
+            var padTop = tgt.css("padding-top");
+            var padding = parseInt(padBot)+parseInt(padTop);
+            var maximum = scrollHt-(tgtHeight+padding);
             if ( scrollPos == 0 )
                 return this.html_lines[0].ref+",0.0";
+            else if ( scrollPos == maximum )
+                return this.html_lines[this.html_lines.length-1].ref+",1.0";
             else
             {
                 // align on middle of target window
@@ -778,11 +783,11 @@ function MMLEditor(source, target, opts) {
             }
         }
         else
-            return "0,0.0";
+            return ",0.0";
     };
     /**
-     * Get the source page number currently in view and the line-number 
-     * of the central line.
+     * Get the source page number currently in view in the textarea, 
+     * and the line-number of the central line.
      * @param src the jQuery textarea element
      * @return a string being the ref of the page, comma, and 
      * fraction of page in view
@@ -796,8 +801,7 @@ function MMLEditor(source, target, opts) {
             if ( scrollPos == 0 )
                 return this.page_lines[0].ref+",0.0";
             else if ( scrollPos == maximum )
-                return this.page_lines[this.page_lines.length-1].ref
-                    +",1.0";
+                return this.page_lines[this.page_lines.length-1].ref+",1.0";
             else
             {
                 scrollPos += src.height()/2;

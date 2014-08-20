@@ -745,6 +745,7 @@ function MMLEditor(source, target, opts) {
         if ( this.num_lines > 0 && this.html_lines.length > 0 )
         {
             var scrollPos = tgt.scrollTop();
+            console.log("target:"+scrollPos);
             var scrollHt = tgt.prop("scrollHeight");
             var tgtHeight = tgt.height();
             var padBot = tgt.css("padding-bottom");
@@ -798,6 +799,7 @@ function MMLEditor(source, target, opts) {
         if ( this.num_lines > 0 && this.page_lines.length > 0 )
         {
             var scrollPos = src.scrollTop();
+            console.log("source:"+scrollPos);
             var maximum = src.prop("scrollHeight")-src.height();
             if ( scrollPos == 0 )
                 return this.page_lines[0].ref+",0.0";
@@ -856,7 +858,7 @@ function MMLEditor(source, target, opts) {
         (function(self) {
             return function(e) {
                 // prevent feedback
-                if ( !$("#"+self.src).data("noscroll") )
+                if ( e.originalEvent )
                 {
                     var loc = self.getSourcePage($(this));
                     var parts = loc.split(",");
@@ -882,18 +884,14 @@ function MMLEditor(source, target, opts) {
                         pos = 0;
                     target[0].scrollTop = pos; 
                 }
-		else
-                    $("#"+self.src).data("noscroll",false);
             }
         })(this)
     );
     $("#"+target).scroll(
         (function(self) {
             return function(e) {
-                // prevent feedback
-                if ( !$("#"+self.target).data("noscroll") ) 
+                if ( e.originalEvent )
                 {
-                    $("#"+self.src).data("noscroll",true);
                     var loc = self.getHtmlPage($(this));
                     var parts = loc.split(",");
                     var pos;
@@ -917,10 +915,8 @@ function MMLEditor(source, target, opts) {
                     pos -= Math.round(source.height()/2);
                     if ( pos < 0 )
                         pos = 0;
-                    source[0].scrollTop = pos; 
+                    source[0].scrollTop = pos;
                 }
-		else
-                    $("#"+self.target).data("noscroll",false);
             }
         })(this)
     );

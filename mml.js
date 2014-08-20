@@ -25,14 +25,26 @@ function RefLoc( ref, loc) {
  * @param dialect an MML dialect description in JSON format, see mml-dialect.md
  */
 function MMLEditor(opts, dialect) {
+    /** set to true when source altered, controls updating */
     this.changed = true;
+    /** quote chars for smartquotes */
     this.quotes = {"'":1,"‘":1,"’":1,'"':1,'”':1,'“':1};
+    /** number of lines in textarea source */
     this.num_lines = 0;
+    /** flag to indicate if current para was foratted */
     this.formatted = false;
+    /** page break RefLoc page starts in textarea (lines) */
     this.page_lines = new Array();
+    /** page break RefLocs for html target */
     this.html_lines = new Array();
+    /** page-breaks for images */
+    this.image_lines = new Array();
+    /** copy of options for MMLEditor */
     this.opts = opts;
+    /** dialect file of MML */
     this.dialect = dialect;
+    /** flag to show images loaded */
+    this.imagesLoaded = false;
     /**
      * This should be a function of Array
      * @param the Array to test
@@ -674,6 +686,7 @@ function MMLEditor(opts, dialect) {
             this.html_lines = new Array();
             var text = $("#"+this.opts.source).val();
             $("#"+this.opts.target).html(this.toHTML(text));
+            this.loadImages();
             this.changed = false;
             $(".page").css("display","inline");
             var base = 0;
@@ -842,6 +855,12 @@ function MMLEditor(opts, dialect) {
         }
         else
             return ",0.0";
+    };
+    // set up images
+    this.loadImages = function() {
+        // go through the already loaded page numbers in this.page_lines
+        // compose the urls and write out a series of images in paras
+        // give them natural height and width but constrained to 480 px
     };
     window.setInterval(
         (function(self) {

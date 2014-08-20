@@ -1,7 +1,8 @@
 /* box to receive text */
 #target { width: 480px; height:480px; border: 1px solid; float: left; display: inline-block; overflow: auto; padding: 10px 10px 10px 10px; }
 /* the source textarea */
-#source { -moz-box-sizing: border-box; -ms-box-sizing: border-box; -webkit-box-sizing: border-box; font-size: 12px; width: 480px; height:502px; float:left; display: inline-block; padding: 10px 10px 0px 10px;overflow: auto}
+#source { box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; -webkit-box-sizing: border-box; font-size: 12px; width: 480px; height:502px; float:left; display: inline-block; padding: 10px 10px 0px 10px;overflow: auto}
+#images { width: 480px; height: 480px; float: left; display: inline-block; overflow: auto}
 /* formats supported by the MML dialect */
 body {margin: 0px 0px 0px 0px; font: 14px arial, sans-serif;}
 p {margin-top:0}

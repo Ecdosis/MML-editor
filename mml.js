@@ -33,6 +33,8 @@ function MMLEditor(opts, dialect) {
     this.num_lines = 0;
     /** flag to indicate if current para was foratted */
     this.formatted = false;
+    /** flag to show images loaded */
+    this.imagesLoaded = false;
     /** page break RefLoc page starts in textarea (lines) */
     this.page_lines = new Array();
     /** page break RefLocs for html target */
@@ -43,8 +45,6 @@ function MMLEditor(opts, dialect) {
     this.opts = opts;
     /** dialect file of MML */
     this.dialect = dialect;
-    /** flag to show images loaded */
-    this.imagesLoaded = false;
     /**
      * This should be a function of Array
      * @param the Array to test
@@ -762,7 +762,6 @@ function MMLEditor(opts, dialect) {
         if ( this.num_lines > 0 && this.html_lines.length > 0 )
         {
             var scrollPos = tgt.scrollTop();
-            console.log("target:"+scrollPos);
             var scrollHt = tgt.prop("scrollHeight");
             var tgtHeight = tgt.height();
             var padBot = tgt.css("padding-bottom");
@@ -856,9 +855,47 @@ function MMLEditor(opts, dialect) {
         else
             return ",0.0";
     };
+    this.addImageRefNo = function(refloc) {
+        if ( this.image_lines.length == 0 )
+            this.image_lines.length = this.page_lines.length;
+        var index = this.findRefIndex( this.page_lines, refloc.ref );
+        this.image_lines[index] = refloc;
+        if ( index < this.image_lines.length-1 && this.image_lines[index+1] != undefined )
+        {
+            var currentHt = 0;
+            for ( var i=0;i<this.image_lines.length;i++ )
+            {
+                if ( this.image_lines[i] != undefined )
+                {
+                    this.image_lines[i].loc = currentHt;
+                    currentHt += $("#image_"+this.image_lines[i].ref).height();
+                    console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt);
+                }
+                else
+                    break;
+            }
+        }
+    };
     // set up images
     this.loadImages = function() {
+        var div = $("#"+this.opts.images);
         // go through the already loaded page numbers in this.page_lines
+        for ( var i=0;i<this.page_lines.length;i++ )
+        {
+            var ref = this.page_lines[i].ref;
+            var src = this.opts.imageUrl+"/"+opts.imagePrefix
+                +ref+opts.imageSuffix;
+            div.append('<img src="'+src+'" id="image_'+ref+'" style="width: 100%">\n');
+            var imageObj = $("#image_"+ref);
+            imageObj.load( (function(self) {
+                return function() {
+                    $(this).css("max-width",this.naturalWidth+"px");
+                    var ref = $(this).attr("id").split("_")[1];
+                    self.addImageRefNo(new RefLoc(ref,$(this).height()) );
+                }
+                })(this)
+            );
+        }
         // compose the urls and write out a series of images in paras
         // give them natural height and width but constrained to 480 px
     };

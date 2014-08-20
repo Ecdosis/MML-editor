@@ -8,7 +8,7 @@
 <script type="text/javascript" src="mml.js"></script>
 <script>
 $( document ).ready(function() {
-  var opts = {
+  var dialect = {
         "description": "Novel markup for De Roberto",
         "section": {"prop": "section"},
         "paragraph": {"prop": ""},
@@ -22,7 +22,15 @@ $( document ).ready(function() {
         "paraformats": [{"leftTag":"->","rightTag":"<-","prop":"centered"}],
         "milestones": [{"leftTag":"[","rightTag":"]","prop":"page"}]
     };
-    var editor = new MMLEditor("source","target", opts);
+    var opts = {
+        "source": "source",
+        "target": "target",
+        "images": "images",
+        "imagePrefix": "p",
+        "imageSuffix": ".png",
+        "imageUrl": "images"
+   };
+    var editor = new MMLEditor(opts, dialect);
 }); 
 </script>
 </head>

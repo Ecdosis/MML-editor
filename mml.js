@@ -14,21 +14,25 @@ function RefLoc( ref, loc) {
  * In the third a HTML preview generated from the editable text.
  * The MML diaclet is defined from a JSON opts object.
  * To use it just create one:
- * var editor = new MMLEditor("source","target",opts);
- * @param source the ID of a textarea on the page (no leading "#")
- * @param target the ID of an empty div element (no leading "#")
- * @param opts an MML dialect description in JSON format, see mml-dialect.md
+ * var editor = new MMLEditor(opts,dialect);
+ * @param opts the options neede to run MMLEditor:
+ * source: the ID of a textarea on the page (no leading "#")
+ * target: the ID of an empty div element (no leading "#")
+ * images: the ID of the div to receive the images
+ * imagePrefix: the prefix before each page-image name
+ * imageSuffix: the suffix for each image name e.g. ".png"
+ * imageUrl: the url to fetch the images from
+ * @param dialect an MML dialect description in JSON format, see mml-dialect.md
  */
-function MMLEditor(source, target, opts) {
+function MMLEditor(opts, dialect) {
     this.changed = true;
     this.quotes = {"'":1,"‘":1,"’":1,'"':1,'”':1,'“':1};
     this.num_lines = 0;
-    this.opts = opts;
     this.formatted = false;
     this.page_lines = new Array();
     this.html_lines = new Array();
-    this.target = target;
-    this.src = source;
+    this.opts = opts;
+    this.dialect = dialect;
     /**
      * This should be a function of Array
      * @param the Array to test
@@ -76,9 +80,9 @@ function MMLEditor(source, target, opts) {
      */
     this.processDividers = function(text)
     {
-        if ( this.opts.dividers!=undefined )
+        if ( this.dialect.dividers!=undefined )
         {
-            var divs = this.opts.dividers;
+            var divs = this.dialect.dividers;
             for ( var i=0;i<divs.length;i++ )
             {
                 var div = divs[i];
@@ -162,7 +166,7 @@ function MMLEditor(source, target, opts) {
      */
     this.processSmartQuotes = function( text )
     {
-        if ( this.opts.smartquotes )
+        if ( this.dialect.smartquotes )
         {
             for ( var i=0;i<text.length;i++ )
             {
@@ -187,9 +191,9 @@ function MMLEditor(source, target, opts) {
      */ 
     this.processCfmts = function(text)
     {
-        if ( this.opts.charformats != undefined )
+        if ( this.dialect.charformats != undefined )
         {
-            var cfmts = this.opts.charformats;
+            var cfmts = this.dialect.charformats;
             var tags = new Array();
             var stack = new Array();
             for ( var k=0;k<cfmts.length;k++ )
@@ -214,8 +218,8 @@ function MMLEditor(source, target, opts) {
                     }
                     if ( j == tag.length )
                     {
-                        if ( this.opts.softhyphens != undefined 
-                            && this.opts.softhyphens && tag == "-\n" )
+                        if ( this.dialect.softhyphens != undefined 
+                            && this.dialect.softhyphens && tag == "-\n" )
                         {
                             text = text.slice(0,i)
                                 +'<span class="soft-hyphen">-</span>'
@@ -297,9 +301,9 @@ function MMLEditor(source, target, opts) {
      */
     this.processPfmts = function( text )
     {
-        if ( this.opts.paraformats !=undefined )
+        if ( this.dialect.paraformats !=undefined )
         {
-            var pfmts = this.opts.paraformats;
+            var pfmts = this.dialect.paraformats;
             for ( var i=0;i<pfmts.length;i++ )
             {
                 var pfmt = pfmts[i];
@@ -328,14 +332,14 @@ function MMLEditor(source, target, opts) {
      */
     this.processCodeBlocks = function( input )
     {
-        if ( this.opts.codeblocks!=undefined )
+        if ( this.dialect.codeblocks!=undefined )
         {
             var text = "";
             var lines = input.split("\n");
             var start = false;
-            var attr = (this.opts.codeblocks.prop!=undefined
-                &&this.opts.codeblocks.prop.length>0)
-                ?' class="'+this.opts.codeblocks.prop+'"':"";
+            var attr = (this.dialect.codeblocks.prop!=undefined
+                &&this.dialect.codeblocks.prop.length>0)
+                ?' class="'+this.dialect.codeblocks.prop+'"':"";
             for ( var i=0;i<lines.length;i++ )
             {
                 if ( lines[i].indexOf("    ")==0||lines[i].indexOf('\t')==0 )
@@ -427,13 +431,13 @@ function MMLEditor(source, target, opts) {
      */
     this.processQuotations = function(text)
     {
-        if ( this.opts.quotations != undefined )
+        if ( this.dialect.quotations != undefined )
         {
             var old;
             var res = "";
-            var attr = (this.opts.quotations.prop!=undefined
-                &&this.opts.quotations.prop.length>0)
-                ?' class="'+this.opts.quotations.prop+'"':"";
+            var attr = (this.dialect.quotations.prop!=undefined
+                &&this.dialect.quotations.prop.length>0)
+                ?' class="'+this.dialect.quotations.prop+'"':"";
             var stack = new Array();
             var lines = text.split("\n");
             for ( var i=0;i<lines.length;i++ )
@@ -517,21 +521,21 @@ function MMLEditor(source, target, opts) {
      */
     this.processHeadings = function( text )
     {
-        if ( this.opts.headings !=undefined )
+        if ( this.dialect.headings !=undefined )
         {
             var i,ms,line;
             var res = "";
-            var mss = (this.opts.milestones!=undefined&&this.opts.milestones.length>0)
-                ?this.opts.milestones:undefined;
+            var mss = (this.dialect.milestones!=undefined&&this.dialect.milestones.length>0)
+                ?this.dialect.milestones:undefined;
             var heads = new Array();
             var tags = new Array();
-            for ( i=0;i<this.opts.headings.length;i++ )
+            for ( i=0;i<this.dialect.headings.length;i++ )
             {
-                if ( this.opts.headings[i].prop != undefined 
-                    && this.opts.headings[i].tag != undefined )
+                if ( this.dialect.headings[i].prop != undefined 
+                    && this.dialect.headings[i].tag != undefined )
                 {
-                    heads[this.opts.headings[i].tag] = this.opts.headings[i].prop;    
-                    tags[this.opts.headings[i].prop] = 'h'+(i+1);
+                    heads[this.dialect.headings[i].tag] = this.dialect.headings[i].prop;    
+                    tags[this.dialect.headings[i].prop] = 'h'+(i+1);
                 }
             }
             var lines = text.split("\n");
@@ -602,11 +606,11 @@ function MMLEditor(source, target, opts) {
     this.processPara = function( text )
     {
         this.formatted = false;
-        var attr = (this.opts.paragraph!=undefined
-            &&this.opts.paragraph.prop!=undefined
-            &&this.opts.paragraph.prop.length>0)
-            ?' class="'+this.opts.paragraph.prop+'" title="'
-            +this.opts.paragraph.prop+'"':"";
+        var attr = (this.dialect.paragraph!=undefined
+            &&this.dialect.paragraph.prop!=undefined
+            &&this.dialect.paragraph.prop.length>0)
+            ?' class="'+this.dialect.paragraph.prop+'" title="'
+            +this.dialect.paragraph.prop+'"':"";
         text = this.processSmartQuotes(text);
         text = this.processHeadings(text);
         text = this.processCodeBlocks(text);
@@ -644,9 +648,9 @@ function MMLEditor(source, target, opts) {
     this.toHTML = function(text)
     {
         var html = "";
-        var sectionName = (this.opts.section!=undefined
-            &&this.opts.section.prop!=undefined)
-            ?this.opts.section.prop:"section";
+        var sectionName = (this.dialect.section!=undefined
+            &&this.dialect.section.prop!=undefined)
+            ?this.dialect.section.prop:"section";
         var sections = text.split("\n\n\n");
         for ( var i=0;i<sections.length;i++ )
         {
@@ -668,8 +672,8 @@ function MMLEditor(source, target, opts) {
             this.num_lines = 0;
             this.page_lines = new Array();
             this.html_lines = new Array();
-            var text = $("#"+source).val();
-            $("#"+target).html(this.toHTML(text));
+            var text = $("#"+this.opts.source).val();
+            $("#"+this.opts.target).html(this.toHTML(text));
             this.changed = false;
             $(".page").css("display","inline");
             var base = 0;
@@ -847,14 +851,14 @@ function MMLEditor(source, target, opts) {
         })(this),300
     );
     // force update when user modifies the source
-    $("#"+source).keyup( 
+    $("#"+opts.source).keyup( 
         (function(self) {
             return function() {
                 self.changed = true;
             }
         })(this)
     );
-    $("#"+source).scroll( 
+    $("#"+opts.source).scroll( 
         (function(self) {
             return function(e) {
                 // prevent feedback
@@ -874,10 +878,10 @@ function MMLEditor(source, target, opts) {
                     else if ( index < self.html_lines.length-1)
                         pageHeight = self.html_lines[index+1].loc-pos;
                     else
-                        pageHeight = $("#"+self.target).prop("scrollHeight")
+                        pageHeight = $("#"+self.opts.target).prop("scrollHeight")
                             -self.html_lines[index].loc;
                     pos += Math.round(parseFloat(parts[1])*pageHeight);
-                    var target = $("#"+self.target);
+                    var target = $("#"+self.opts.target);
                     // scrolldown one half-page
                     pos -= Math.round(target.height()/2);
                     if ( pos < 0 )
@@ -887,7 +891,7 @@ function MMLEditor(source, target, opts) {
             }
         })(this)
     );
-    $("#"+target).scroll(
+    $("#"+opts.target).scroll(
         (function(self) {
             return function(e) {
                 if ( e.originalEvent )
@@ -896,7 +900,7 @@ function MMLEditor(source, target, opts) {
                     var parts = loc.split(",");
                     var pos;
                     var index = self.findRefIndex(self.page_lines,parts[0]);
-                    var lineHeight = $("#"+self.src).prop("scrollHeight")/self.num_lines;
+                    var lineHeight = $("#"+self.opts.source).prop("scrollHeight")/self.num_lines;
                     if ( index >= 0 )
                         pos = self.page_lines[index].loc*lineHeight;
                     else
@@ -907,10 +911,10 @@ function MMLEditor(source, target, opts) {
                     else if ( index < self.page_lines.length-1)
                         pageHeight = (self.page_lines[index+1].loc*lineHeight)-pos;
                     else
-                        pageHeight = $("#"+self.src).prop("scrollHeight")
+                        pageHeight = $("#"+self.opts.source).prop("scrollHeight")
                             -(self.page_lines[index].loc*lineHeight);
                     pos += Math.round(parseFloat(parts[1])*pageHeight);
-                    var source = $("#"+self.src);
+                    var source = $("#"+self.opts.source);
                     // scrolldown one half-page
                     pos -= Math.round(source.height()/2);
                     if ( pos < 0 )

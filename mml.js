@@ -803,6 +803,7 @@ function MMLEditor(opts, dialect) {
         else
             return ",0.0";
     };
+    // to do: getImagePage
     /**
      * Get the source page number currently in view in the textarea, 
      * and the line-number of the central line.
@@ -876,34 +877,40 @@ function MMLEditor(opts, dialect) {
             }
         }
     };
-    // set up images
+    /**
+     * Load the images. 
+     */
     this.loadImages = function() {
         var div = $("#"+this.opts.images);
         // go through the already loaded page numbers in this.page_lines
-        for ( var i=0;i<this.page_lines.length;i++ )
+        if ( !this.imagesLoaded )
         {
-            var ref = this.page_lines[i].ref;
-            var src = this.opts.imageUrl+"/"+opts.imagePrefix
-                +ref+opts.imageSuffix;
-            div.append('<img src="'+src+'" id="image_'+ref+'" style="width: 100%">\n');
-            var imageObj = $("#image_"+ref);
-            imageObj.load( (function(self) {
-                return function() {
-                    $(this).css("max-width",this.naturalWidth+"px");
-                    var ref = $(this).attr("id").split("_")[1];
-                    self.addImageRefNo(new RefLoc(ref,$(this).height()) );
-                }
-                })(this)
-            );
+            for ( var i=0;i<this.page_lines.length;i++ )
+            {
+                var ref = this.page_lines[i].ref;
+                var src = this.opts.imageUrl+"/"+opts.imagePrefix
+                    +ref+opts.imageSuffix;
+                div.append('<img src="'+src+'" id="image_'+ref+'" style="width: 100%">\n');
+                var imageObj = $("#image_"+ref);
+                imageObj.load( (function(self) {
+                    return function() {
+                        $(this).css("max-width",this.naturalWidth+"px");
+                        var ref = $(this).attr("id").split("_")[1];
+                        self.addImageRefNo(new RefLoc(ref,$(this).height()) );
+                    }
+                    })(this)
+                );
+            }
+            this.imagesLoaded = true;
         }
-        // compose the urls and write out a series of images in paras
-        // give them natural height and width but constrained to 480 px
     };
+    // this sets up the timer for updating
     window.setInterval(
         (function(self) {
             return function() {
                 self.updateHTML();
             }
+        // this should really reset the interval based on how long it took
         })(this),300
     );
     // force update when user modifies the source
@@ -947,6 +954,7 @@ function MMLEditor(opts, dialect) {
             }
         })(this)
     );
+    // to do: scroll images
     $("#"+opts.target).scroll(
         (function(self) {
             return function(e) {

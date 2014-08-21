@@ -14,9 +14,11 @@ The MML Editor is a javascript object that will eventually consist of three pane
 
 To create the MML-Editor all that is needed is a JSON dialect file and three elements with IDs on a HTML page: two divs (for panels 1 and 3) and a textarea. Also needed is a css file to format the preview. Invocation is like this:
 
-    var editor = new MMLEditor("source","target", opts);
+    var editor = new MMLEditor(opts,dialect);
 
-The first and second (and eventually third) arguments are IDs of the elements the panels will replace. The current third argument is a string representation of the dialect file. 
+The first argument is a JSON format file containing controls for the 
+editor. The second is the MML dialect description. Both are described 
+below.
 
 The CMS should provide buttons to perform the basic operations of the editor, but the editor itself only has an API to perform these functions:
 
@@ -27,6 +29,16 @@ The CMS should provide buttons to perform the basic operations of the editor, bu
 5. Delete layer or version. This will completely remove a layer or version from the document.
 
 Since the editor is only invoked to edit a particular document or work it does not need an "open" button. The user will already have clicked "Edit" on some document, and need only go back or select another feature of the website from the normal CMS menu above.
+
+#### Editor options
+The editor's options include the following simple keys:
+
+* source: the ID of a textarea on the page (no leading "#")
+* target: the ID of an empty div element (no leading "#")
+* images: the ID of the div to receive the images
+* imagePrefix: the prefix before each page-image name
+* imageSuffix: the suffix for each image name e.g. ".png"
+* imageUrl: the url to fetch the images from
 
 #### MML Dialect file
 The MML dialect file describes all the configurable parts of an MML definition.

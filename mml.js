@@ -871,7 +871,7 @@ function MMLEditor(opts, dialect) {
                 if ( this.image_lines[i] != undefined )
                 {
                     this.image_lines[i].loc = currentHt;
-                    console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt);      
+                    //console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt);      
                     currentHt += $("#image_"+this.image_lines[i].ref).height(); 
                 }
                 else
@@ -901,6 +901,8 @@ function MMLEditor(opts, dialect) {
             var imageObjs = $("img[id^='image_']");
             imageObjs.each( (function(self) {
                 return function() {
+                    if ( $(this).width()==0 )
+                        $(this).load(this.src);
                     $(this).css("max-width",this.naturalWidth+"px");
                     var ref = $(this).attr("id").split("_")[1];
                     self.addImageRefNo(new RefLoc(ref,$(this).height()) );

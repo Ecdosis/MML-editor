@@ -8,7 +8,7 @@ function RefLoc( ref, loc) {
     this.loc = loc;
 }
 /**
- * An MML Editor provides 2 or 3 panels which are sync-scrolled.
+ * An MML Editor provides 3 panels which are sync-scrolled.
  * In the first panel there is a succession of page-images.
  * In the second an editable text in a minimal markup language (MML).
  * In the third a HTML preview generated from the editable text.
@@ -35,6 +35,8 @@ function MMLEditor(opts, dialect) {
     this.formatted = false;
     /** flag to show images loaded */
     this.imagesLoaded = false;
+    /** number of page images currently loaded */
+    this.numImagesLoaded = 0;
     /** page break RefLoc page starts in textarea (lines) */
     this.page_lines = new Array();
     /** page break RefLocs for html target */
@@ -751,59 +753,59 @@ function MMLEditor(opts, dialect) {
         return -1;
     };
     /**
-     * Get the target page number currently in view and the proportion 
+     * Get the page number currently in view and the proportion 
      * of the page visible.
-     * @param tgt the jQuery div object containing the preview
+     * @param div the jQuery div object to get scroll info from
+     * @param lines the lines array e.g. html_lines
      * @return a string being the ref of the page, comma, and 
      * fraction of page in view
      */
-    this.getHtmlPage = function( tgt )
+    this.getPixelPage = function( div, lines )
     {
-        if ( this.num_lines > 0 && this.html_lines.length > 0 )
+        if ( this.num_lines > 0 && lines.length > 0 )
         {
-            var scrollPos = tgt.scrollTop();
-            var scrollHt = tgt.prop("scrollHeight");
-            var tgtHeight = tgt.height();
-            var padBot = tgt.css("padding-bottom");
-            var padTop = tgt.css("padding-top");
+            var scrollPos = div.scrollTop();
+            var scrollHt = div.prop("scrollHeight");
+            var divHeight = div.height();
+            var padBot = div.css("padding-bottom");
+            var padTop = div.css("padding-top");
             var padding = parseInt(padBot)+parseInt(padTop);
-            var maximum = scrollHt-(tgtHeight+padding);
+            var maximum = scrollHt-(divHeight+padding);
             if ( scrollPos == 0 )
-                return this.html_lines[0].ref+",0.0";
+                return lines[0].ref+",0.0";
             else if ( scrollPos == maximum )
-                return this.html_lines[this.html_lines.length-1].ref+",1.0";
+                return lines[lines.length-1].ref+",1.0";
             else
             {
                 // align on middle of target window
-                scrollPos += tgt.height()/2;
-                var index = this.findHighestIndex( this.html_lines, scrollPos ); 
+                scrollPos += div.height()/2;
+                var index = this.findHighestIndex( lines, scrollPos ); 
                 var pixelsOnPage;
                 if ( index == -1 )
                 {
-                    pixelsOnPage = this.html_lines[0].loc;
+                    pixelsOnPage = lines[0].loc;
                 }
-                else if ( index == this.html_lines.length-1)
+                else if ( index == lines.length-1)
                 {
-                    pixelsOnPage = tgt.prop('scrollHeight')-this.html_lines[index].loc;
+                    pixelsOnPage = div.prop('scrollHeight')-lines[index].loc;
                 }  
                 else
                 {
-                    var nextPageStart = this.html_lines[index+1].loc;
-                    pixelsOnPage = nextPageStart-this.html_lines[index].loc;
+                    var nextPageStart = lines[index+1].loc;
+                    pixelsOnPage = nextPageStart-lines[index].loc;
                 }              
                 if ( index == -1 )
                     return ",0.0";
                 else
                 {
-                    var fraction = (scrollPos-this.html_lines[index].loc)/pixelsOnPage;
-                    return this.html_lines[index].ref+","+fraction;
+                    var fraction = (scrollPos-lines[index].loc)/pixelsOnPage;
+                    return lines[index].ref+","+fraction;
                 }
             }
         }
         else
             return ",0.0";
     };
-    // to do: getImagePage
     /**
      * Get the source page number currently in view in the textarea, 
      * and the line-number of the central line.
@@ -816,7 +818,6 @@ function MMLEditor(opts, dialect) {
         if ( this.num_lines > 0 && this.page_lines.length > 0 )
         {
             var scrollPos = src.scrollTop();
-            console.log("source:"+scrollPos);
             var maximum = src.prop("scrollHeight")-src.height();
             if ( scrollPos == 0 )
                 return this.page_lines[0].ref+",0.0";
@@ -861,7 +862,8 @@ function MMLEditor(opts, dialect) {
             this.image_lines.length = this.page_lines.length;
         var index = this.findRefIndex( this.page_lines, refloc.ref );
         this.image_lines[index] = refloc;
-        if ( index < this.image_lines.length-1 && this.image_lines[index+1] != undefined )
+        this.numImagesLoaded++;
+        if ( this.numImagesLoaded == this.image_lines.length )
         {
             var currentHt = 0;
             for ( var i=0;i<this.image_lines.length;i++ )
@@ -869,11 +871,14 @@ function MMLEditor(opts, dialect) {
                 if ( this.image_lines[i] != undefined )
                 {
                     this.image_lines[i].loc = currentHt;
-                    currentHt += $("#image_"+this.image_lines[i].ref).height();
-                    console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt);
+                    console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt);      
+                    currentHt += $("#image_"+this.image_lines[i].ref).height(); 
                 }
                 else
+                {
+                    console.log("empty page ref found... skipping");
                     break;
+                }
             }
         }
     };
@@ -891,18 +896,47 @@ function MMLEditor(opts, dialect) {
                 var src = this.opts.imageUrl+"/"+opts.imagePrefix
                     +ref+opts.imageSuffix;
                 div.append('<img src="'+src+'" id="image_'+ref+'" style="width: 100%">\n');
-                var imageObj = $("#image_"+ref);
-                imageObj.load( (function(self) {
-                    return function() {
-                        $(this).css("max-width",this.naturalWidth+"px");
-                        var ref = $(this).attr("id").split("_")[1];
-                        self.addImageRefNo(new RefLoc(ref,$(this).height()) );
-                    }
-                    })(this)
-                );
             }
             this.imagesLoaded = true;
+            var imageObjs = $("img[id^='image_']");
+            imageObjs.each( (function(self) {
+                return function() {
+                    $(this).css("max-width",this.naturalWidth+"px");
+                    var ref = $(this).attr("id").split("_")[1];
+                    self.addImageRefNo(new RefLoc(ref,$(this).height()) );
+                }
+                })(this)
+            );
         }
+    };
+    /**
+     * Scroll to the specified location
+     * @param loc the location to scroll to, as {page ref},{fraction}
+     * @param lines an array of RefLocs defining page-break positions
+     * @param elemToScroll the jQuery element to scroll
+     * scale the scale to apply to locs from the lines array to target
+     */
+    this.scrollTo = function( loc, lines, elemToScroll, scale ) {
+        var parts = loc.split(",");
+        var pos;
+        var index = this.findRefIndex(lines,parts[0]);
+        if ( index >= 0 )
+            pos = lines[index].loc*scale;
+        else
+            pos = 0;
+        var pageHeight;
+        if ( index == -1 )
+            pageHeight = 0;
+        else if ( index < lines.length-1)
+            pageHeight = (lines[index+1].loc*scale)-pos;
+        else
+            pageHeight = elemToScroll.prop("scrollHeight")-(lines[index].loc*scale);
+        pos += Math.round(parseFloat(parts[1])*pageHeight);
+        // scrolldown one half-page
+        pos -= Math.round(elemToScroll.height()/2);
+        if ( pos < 0 )
+            pos = 0;
+        elemToScroll[0].scrollTop = pos; 
     };
     // this sets up the timer for updating
     window.setInterval(
@@ -928,62 +962,35 @@ function MMLEditor(opts, dialect) {
                 if ( e.originalEvent )
                 {
                     var loc = self.getSourcePage($(this));
-                    var parts = loc.split(",");
-                    var pos;
-                    var index = self.findRefIndex(self.html_lines,parts[0]);
-                    if ( index >= 0 )
-                        pos = self.html_lines[index].loc;
-                    else
-                        pos = 0;
-                    var pageHeight;
-                    if ( index == -1 )
-                        pageHeight = 0;
-                    else if ( index < self.html_lines.length-1)
-                        pageHeight = self.html_lines[index+1].loc-pos;
-                    else
-                        pageHeight = $("#"+self.opts.target).prop("scrollHeight")
-                            -self.html_lines[index].loc;
-                    pos += Math.round(parseFloat(parts[1])*pageHeight);
-                    var target = $("#"+self.opts.target);
-                    // scrolldown one half-page
-                    pos -= Math.round(target.height()/2);
-                    if ( pos < 0 )
-                        pos = 0;
-                    target[0].scrollTop = pos; 
+                    self.scrollTo(loc,self.html_lines,$("#"+self.opts.target),1.0);
+                    self.scrollTo(loc,self.image_lines,$("#"+self.opts.images),1.0);
                 }
             }
         })(this)
     );
-    // to do: scroll images
     $("#"+opts.target).scroll(
         (function(self) {
             return function(e) {
                 if ( e.originalEvent )
                 {
-                    var loc = self.getHtmlPage($(this));
-                    var parts = loc.split(",");
-                    var pos;
-                    var index = self.findRefIndex(self.page_lines,parts[0]);
                     var lineHeight = $("#"+self.opts.source).prop("scrollHeight")/self.num_lines;
-                    if ( index >= 0 )
-                        pos = self.page_lines[index].loc*lineHeight;
-                    else
-                        pos = 0;
-                    var pageHeight;
-                    if ( index == -1 )
-                        pageHeight = 0;
-                    else if ( index < self.page_lines.length-1)
-                        pageHeight = (self.page_lines[index+1].loc*lineHeight)-pos;
-                    else
-                        pageHeight = $("#"+self.opts.source).prop("scrollHeight")
-                            -(self.page_lines[index].loc*lineHeight);
-                    pos += Math.round(parseFloat(parts[1])*pageHeight);
-                    var source = $("#"+self.opts.source);
-                    // scrolldown one half-page
-                    pos -= Math.round(source.height()/2);
-                    if ( pos < 0 )
-                        pos = 0;
-                    source[0].scrollTop = pos;
+                    var loc = self.getPixelPage($(this),self.html_lines);
+                    self.scrollTo(loc,self.page_lines,$("#"+self.opts.source),lineHeight);
+                    // for some reason this causes feedback, but it works without!!
+                    //self.scrollTo(loc,self.image_lines,$("#"+self.opts.images),1.0);
+                }
+            }
+        })(this)
+    );
+    $("#"+opts.images).scroll(
+        (function(self) {
+            return function(e) {
+                if ( e.originalEvent )
+                {
+                    var lineHeight = $("#"+self.opts.source).prop("scrollHeight")/self.num_lines;
+                    var loc = self.getPixelPage($(this),self.image_lines);
+                    //self.scrollTo(loc,self.page_lines,$("#"+self.opts.source),lineHeight);
+                    self.scrollTo(loc,self.html_lines,$("#"+self.opts.target),1.0);
                 }
             }
         })(this)

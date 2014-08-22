@@ -860,6 +860,9 @@ function MMLEditor(opts, dialect) {
         else
             return ",0.0";
     };
+    /**
+     * Update the image lines array, which tends to be invalid
+     */
     this.updateImageLines = function() {
         if ( !this.imageLinesCorrect )
         {
@@ -873,7 +876,7 @@ function MMLEditor(opts, dialect) {
                     console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt); 
                     var imgObj = $("#image_"+this.image_lines[i].ref);     
                     var ht = imgObj.height(); 
-                    if( ht == 0 )
+                    if ( ht == 0 )
                     {
                         this.imageLinesCorrect = false;
                         break;
@@ -890,12 +893,18 @@ function MMLEditor(opts, dialect) {
                 this.imageLinesCorrect = true;
         }
     };
+    /**
+     * Add a refloc tot he image lines array
+     * @param refloc the refloc with a probably invalid loc field 
+     */
     this.addImageRefNo = function(refloc) {
         if ( this.image_lines.length == 0 )
             this.image_lines.length = this.page_lines.length;
         var index = this.findRefIndex( this.page_lines, refloc.ref );
         this.image_lines[index] = refloc;
-        this.numImagesLoaded++;
+        if ( $("#image_"+refloc.ref).height()> 0 )
+            this.numImagesLoaded++;
+        // update loc fields if this was the last image to load successfully
         if ( this.numImagesLoaded == this.image_lines.length )
             this.updateImageLines();
     };

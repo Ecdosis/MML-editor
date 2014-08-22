@@ -914,30 +914,29 @@ function MMLEditor(opts, dialect) {
         elemToScroll[0].scrollTop = pos; 
     };
     this.resize = function() {
+        var imgObj = $("#"+this.opts.images);
+        var srcObj = $("#"+this.opts.source);
+        var tgtObj = $("#"+this.opts.target);
         var wHeight = $(window).height();
         var wWidth = $(window).width()-50;
-        var oldIWidth = $("#"+this.opts.images).width();
-        var oldPWidth = $("#"+this.opts.target).width();
-        var oldSWidth = $("#"+this.opts.source).width();
         // compute width
-        $("#"+this.opts.images).width(Math.floor(wWidth/3));
-        $("#"+this.opts.target).width(Math.floor(wWidth/3));
-        $("#"+this.opts.source).width(Math.floor(wWidth/3));
+        imgObj.width(Math.floor(wWidth/3));
+        tgtObj.width(Math.floor(wWidth/3));
+        srcObj.width(Math.floor(wWidth/3));
         // compute height
-        var sPadBot = parseInt($("#"+this.opts.source).css("padding-bottom"),10);
-        var sPadTop = parseInt($("#"+this.opts.source).css("padding-top"),10);  
-        var tPadBot = parseInt($("#"+this.opts.target).css("padding-bottom"),10);
-        var tPadTop = parseInt($("#"+this.opts.target).css("padding-top"),10);  
-        var sBordBot = parseInt($("#"+this.opts.source).css("border-bottom-width"),10);
-        var sBordTop = parseInt($("#"+this.opts.source).css("border-top-width"),10);  
-        var tBordBot = parseInt($("#"+this.opts.target).css("border-bottom-width"),10);
-        var tBordTop = parseInt($("#"+this.opts.target).css("border-top-width"),10);  
-        $("#"+this.opts.images).height(wHeight);
+        var sPadBot = parseInt(srcObj.css("padding-bottom"),10);
+        var sPadTop = parseInt(srcObj.css("padding-top"),10);  
+        var tPadBot = parseInt(tgtObj.css("padding-bottom"),10);
+        var tPadTop = parseInt(tgtObj.css("padding-top"),10);  
+        var sBordBot = parseInt(srcObj.css("border-bottom-width"),10);
+        var sBordTop = parseInt(srcObj.css("border-top-width"),10);  
+        var tBordBot = parseInt(tgtObj.css("border-bottom-width"),10);
+        var tBordTop = parseInt(tgtObj.css("border-top-width"),10);  
+        imgObj.height(wHeight);
         var tAdjust = tPadBot+tPadTop+tBordBot+tBordTop;
         var sAdjust = sPadBot+sPadTop+sBordBot+sBordTop+2;
-        $("#"+this.opts.target).height(wHeight-tAdjust);
-        $("#"+this.opts.source).height(wHeight-sAdjust);
-        console.log("window height="+$(window).height()+" sAdjust="+sAdjust+" tAdjust="+tAdjust);
+        tgtObj.height(wHeight-tAdjust);
+        srcObj.height(wHeight-sAdjust);
     };
     // this sets up the timer for updating
     window.setInterval(

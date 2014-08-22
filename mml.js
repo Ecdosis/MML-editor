@@ -37,6 +37,8 @@ function MMLEditor(opts, dialect) {
     this.imagesLoaded = false;
     /** number of page images currently loaded */
     this.numImagesLoaded = 0;
+    /** true if imageLines correctly computed */
+    this.imageLinesCorrect = false;
     /** page break RefLoc page starts in textarea (lines) */
     this.page_lines = new Array();
     /** page break RefLocs for html target */
@@ -699,6 +701,7 @@ function MMLEditor(opts, dialect) {
                 self.html_lines.push(new RefLoc($(this).text(),$(this).offset().top+base));
             });
             $(".page").css("display","none");
+            this.updateImageLines();
         }
     };
     /**
@@ -857,22 +860,25 @@ function MMLEditor(opts, dialect) {
         else
             return ",0.0";
     };
-    this.addImageRefNo = function(refloc) {
-        if ( this.image_lines.length == 0 )
-            this.image_lines.length = this.page_lines.length;
-        var index = this.findRefIndex( this.page_lines, refloc.ref );
-        this.image_lines[index] = refloc;
-        this.numImagesLoaded++;
-        if ( this.numImagesLoaded == this.image_lines.length )
+    this.updateImageLines = function() {
+        if ( !this.imageLinesCorrect )
         {
             var currentHt = 0;
-            for ( var i=0;i<this.image_lines.length;i++ )
+            var i = 0;
+            for ( ;i<this.image_lines.length;i++ )
             {
                 if ( this.image_lines[i] != undefined )
                 {
                     this.image_lines[i].loc = currentHt;
-                    //console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt);      
-                    currentHt += $("#image_"+this.image_lines[i].ref).height(); 
+                    console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt); 
+                    var imgObj = $("#image_"+this.image_lines[i].ref);     
+                    var ht = imgObj.height(); 
+                    if( ht == 0 )
+                    {
+                        this.imageLinesCorrect = false;
+                        break;
+                    }
+                    currentHt += ht;
                 }
                 else
                 {
@@ -880,7 +886,18 @@ function MMLEditor(opts, dialect) {
                     break;
                 }
             }
+            if ( i == this.image_lines.length )
+                this.imageLinesCorrect = true;
         }
+    };
+    this.addImageRefNo = function(refloc) {
+        if ( this.image_lines.length == 0 )
+            this.image_lines.length = this.page_lines.length;
+        var index = this.findRefIndex( this.page_lines, refloc.ref );
+        this.image_lines[index] = refloc;
+        this.numImagesLoaded++;
+        if ( this.numImagesLoaded == this.image_lines.length )
+            this.updateImageLines();
     };
     /**
      * Load the images. 
@@ -896,14 +913,24 @@ function MMLEditor(opts, dialect) {
                 var src = this.opts.imageUrl+"/"+opts.imagePrefix
                     +ref+opts.imageSuffix;
                 div.append('<img src="'+src+'" id="image_'+ref+'" style="width: 100%">\n');
+                var imgPreload = new Image();
+                $(imgPreload).attr({
+                    src: src
+                });
+                if (!imgPreload.complete && imgPreload.readyState != 4) 
+                {
+                    $(imgPreload).load(function(response, status, xhr) {
+                        if (status == 'error') 
+                            console.log("couldn't load "+src);
+                    });
+                }
             }
             this.imagesLoaded = true;
             var imageObjs = $("img[id^='image_']");
             imageObjs.each( (function(self) {
                 return function() {
-                    if ( $(this).width()==0 )
-                        $(this).load(this.src);
-                    $(this).css("max-width",this.naturalWidth+"px");
+                    if ( this.naturalWidth > 0 )
+                        $(this).css("max-width",this.naturalWidth+"px");
                     var ref = $(this).attr("id").split("_")[1];
                     self.addImageRefNo(new RefLoc(ref,$(this).height()) );
                 }
@@ -919,26 +946,32 @@ function MMLEditor(opts, dialect) {
      * scale the scale to apply to locs from the lines array to target
      */
     this.scrollTo = function( loc, lines, elemToScroll, scale ) {
-        var parts = loc.split(",");
-        var pos;
-        var index = this.findRefIndex(lines,parts[0]);
-        if ( index >= 0 )
-            pos = lines[index].loc*scale;
+        this.updateImageLines();
+        if ( this.imageLinesCorrect )
+        {
+            var parts = loc.split(",");
+            var pos;
+            var index = this.findRefIndex(lines,parts[0]);
+            if ( index >= 0 )
+                pos = lines[index].loc*scale;
+            else
+                pos = 0;
+            var pageHeight;
+            if ( index == -1 )
+                pageHeight = 0;
+            else if ( index < lines.length-1)
+                pageHeight = (lines[index+1].loc*scale)-pos;
+            else
+                pageHeight = elemToScroll.prop("scrollHeight")-(lines[index].loc*scale);
+            pos += Math.round(parseFloat(parts[1])*pageHeight);
+            // scrolldown one half-page
+            pos -= Math.round(elemToScroll.height()/2);
+            if ( pos < 0 )
+                pos = 0;
+            elemToScroll[0].scrollTop = pos; 
+        }
         else
-            pos = 0;
-        var pageHeight;
-        if ( index == -1 )
-            pageHeight = 0;
-        else if ( index < lines.length-1)
-            pageHeight = (lines[index+1].loc*scale)-pos;
-        else
-            pageHeight = elemToScroll.prop("scrollHeight")-(lines[index].loc*scale);
-        pos += Math.round(parseFloat(parts[1])*pageHeight);
-        // scrolldown one half-page
-        pos -= Math.round(elemToScroll.height()/2);
-        if ( pos < 0 )
-            pos = 0;
-        elemToScroll[0].scrollTop = pos; 
+            alert("please wait for images to load");
     };
     // this sets up the timer for updating
     window.setInterval(
@@ -991,7 +1024,7 @@ function MMLEditor(opts, dialect) {
                 {
                     var lineHeight = $("#"+self.opts.source).prop("scrollHeight")/self.num_lines;
                     var loc = self.getPixelPage($(this),self.image_lines);
-                    //self.scrollTo(loc,self.page_lines,$("#"+self.opts.source),lineHeight);
+                    self.scrollTo(loc,self.page_lines,$("#"+self.opts.source),lineHeight);
                     self.scrollTo(loc,self.html_lines,$("#"+self.opts.target),1.0);
                 }
             }

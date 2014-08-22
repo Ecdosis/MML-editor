@@ -992,18 +992,9 @@ function MMLEditor(opts, dialect) {
         var oldPWidth = $("#"+this.opts.target).width();
         var oldSWidth = $("#"+this.opts.source).width();
         // compute width
-        var sumPrefs = prefTASize+prefImageSize+prefPreviewSize;
-        if ( wWidth - sumPrefs <= 200 )
-        {
-            $("#"+this.opts.images).width(oldIWidth+wWidth-sumPrefs/2);
-            $("#"+this.opts.target).width(oldPWidth+wWidth-sumPrefs/2);
-        }
-        else
-        {
-            $("#"+this.opts.images).width(Math.floor(wWidth/3));
-            $("#"+this.opts.target).width(Math.floor(wWidth/3));
-            $("#"+this.opts.source).width(Math.floor(wWidth/3));
-        }
+        $("#"+this.opts.images).width(Math.floor(wWidth/3));
+        $("#"+this.opts.target).width(Math.floor(wWidth/3));
+        $("#"+this.opts.source).width(Math.floor(wWidth/3));
         // compute height
         var sPadBot = parseInt($("#"+this.opts.source).css("padding-bottom"),10);
         var sPadTop = parseInt($("#"+this.opts.source).css("padding-top"),10);  

@@ -19,9 +19,11 @@ function RefLoc( ref, loc) {
  * source: the ID of a textarea on the page (no leading "#")
  * target: the ID of an empty div element (no leading "#")
  * images: the ID of the div to receive the images
- * imagePrefix: the prefix before each page-image name
- * imageSuffix: the suffix for each image name e.g. ".png"
- * imageUrl: the url to fetch the images from
+ * data: contains the keys 
+ *      prefix - the prefix before each image name
+ *      suffix: the suffix for each image name e.g. ".png"
+ *      url: the url to fetch the images from
+        desc: an array of ref, width and height keys for each image
  * @param dialect an MML dialect description in JSON format, see mml-dialect.md
  */
 function MMLEditor(opts, dialect) {
@@ -33,12 +35,8 @@ function MMLEditor(opts, dialect) {
     this.num_lines = 0;
     /** flag to indicate if current para was foratted */
     this.formatted = false;
-    /** flag to show images loaded */
+    /** flag to indicate when images have been loaded */
     this.imagesLoaded = false;
-    /** number of page images currently loaded */
-    this.numImagesLoaded = 0;
-    /** true if imageLines correctly computed */
-    this.imageLinesCorrect = false;
     /** page break RefLoc page starts in textarea (lines) */
     this.page_lines = new Array();
     /** page break RefLocs for html target */
@@ -701,7 +699,6 @@ function MMLEditor(opts, dialect) {
                 self.html_lines.push(new RefLoc($(this).text(),$(this).offset().top+base));
             });
             $(".page").css("display","none");
-            this.updateImageLines();
         }
     };
     /**
@@ -861,54 +858,6 @@ function MMLEditor(opts, dialect) {
             return ",0.0";
     };
     /**
-     * Update the image lines array, which tends to be invalid
-     */
-    this.updateImageLines = function() {
-        if ( !this.imageLinesCorrect )
-        {
-            var currentHt = 0;
-            var i = 0;
-            for ( ;i<this.image_lines.length;i++ )
-            {
-                if ( this.image_lines[i] != undefined )
-                {
-                    this.image_lines[i].loc = currentHt;
-                    console.log("currentHt for "+this.image_lines[i].ref+"="+currentHt); 
-                    var imgObj = $("#image_"+this.image_lines[i].ref);     
-                    var ht = imgObj.height(); 
-                    if ( ht == 0 )
-                    {
-                        this.imageLinesCorrect = false;
-                        break;
-                    }
-                    currentHt += ht;
-                }
-                else
-                {
-                    console.log("empty page ref found... skipping");
-                    break;
-                }
-            }
-            if ( i == this.image_lines.length )
-                this.imageLinesCorrect = true;
-        }
-    };
-    /**
-     * Add a refloc tot he image lines array
-     * @param refloc the refloc with a probably invalid loc field 
-     */
-    this.addImageRefNo = function(refloc) {
-        if ( this.image_lines.length == 0 )
-            this.image_lines.length = this.page_lines.length;
-        var index = this.findRefIndex( this.page_lines, refloc.ref );
-        this.image_lines[index] = refloc;
-        if ( $("#image_"+refloc.ref).height()> 0 )
-            this.numImagesLoaded++;
-        // update loc fields if this was the last image to load successfully
-        if ( this.numImagesLoaded == this.image_lines.length )
-            this.updateImageLines();
-    };
-    /**
      * Load the images. 
      */
     this.loadImages = function() {
@@ -916,35 +865,23 @@ function MMLEditor(opts, dialect) {
         // go through the already loaded page numbers in this.page_lines
         if ( !this.imagesLoaded )
         {
-            for ( var i=0;i<this.page_lines.length;i++ )
+            var currHt = 0;
+            var num_pages = (opts.data.desc != undefined)?opts.data.desc.length:0;
+            for ( var i=0;i<num_pages;i++ )
             {
-                var ref = this.page_lines[i].ref;
-                var src = this.opts.imageUrl+"/"+opts.imagePrefix
-                    +ref+opts.imageSuffix;
-                div.append('<img src="'+src+'" id="image_'+ref+'" style="width: 100%">\n');
-                var imgPreload = new Image();
-                $(imgPreload).attr({
-                    src: src
-                });
-                if (!imgPreload.complete && imgPreload.readyState != 4) 
-                {
-                    $(imgPreload).load(function(response, status, xhr) {
-                        if (status == 'error') 
-                            console.log("couldn't load "+src);
-                    });
-                }
+                var ref = this.opts.data.desc[i].ref;
+                var src = this.opts.data.url+"/"+opts.data.prefix
+                    +ref+opts.data.suffix;
+                div.append('<div class="image"><img src="'+src+'" id="image_'+ref
+                    +'" style="width: 100%"; max-width: '
+                    +opts.data.desc[i].width+'></div>');
+                var divWidth = div.width();
+                var scale = divWidth/opts.data.desc[i].width;
+                var scaledHeight = Math.floor(opts.data.desc[i].height*(scale));
+                this.image_lines.push( new RefLoc(ref,currHt) );    
+                currHt += scaledHeight;
             }
             this.imagesLoaded = true;
-            var imageObjs = $("img[id^='image_']");
-            imageObjs.each( (function(self) {
-                return function() {
-                    if ( this.naturalWidth > 0 )
-                        $(this).css("max-width",this.naturalWidth+"px");
-                    var ref = $(this).attr("id").split("_")[1];
-                    self.addImageRefNo(new RefLoc(ref,$(this).height()) );
-                }
-                })(this)
-            );
         }
     };
     /**
@@ -955,39 +892,30 @@ function MMLEditor(opts, dialect) {
      * scale the scale to apply to locs from the lines array to target
      */
     this.scrollTo = function( loc, lines, elemToScroll, scale ) {
-        this.updateImageLines();
-        if ( this.imageLinesCorrect )
-        {
-            var parts = loc.split(",");
-            var pos;
-            var index = this.findRefIndex(lines,parts[0]);
-            if ( index >= 0 )
-                pos = lines[index].loc*scale;
-            else
-                pos = 0;
-            var pageHeight;
-            if ( index == -1 )
-                pageHeight = 0;
-            else if ( index < lines.length-1)
-                pageHeight = (lines[index+1].loc*scale)-pos;
-            else
-                pageHeight = elemToScroll.prop("scrollHeight")-(lines[index].loc*scale);
-            pos += Math.round(parseFloat(parts[1])*pageHeight);
-            // scrolldown one half-page
-            pos -= Math.round(elemToScroll.height()/2);
-            if ( pos < 0 )
-                pos = 0;
-            elemToScroll[0].scrollTop = pos; 
-        }
+        var parts = loc.split(",");
+        var pos;
+        var index = this.findRefIndex(lines,parts[0]);
+        if ( index >= 0 )
+            pos = lines[index].loc*scale;
         else
-            alert("please wait for images to load");
+            pos = 0;
+        var pageHeight;
+        if ( index == -1 )
+            pageHeight = 0;
+        else if ( index < lines.length-1)
+            pageHeight = (lines[index+1].loc*scale)-pos;
+        else
+            pageHeight = elemToScroll.prop("scrollHeight")-(lines[index].loc*scale);
+        pos += Math.round(parseFloat(parts[1])*pageHeight);
+        // scrolldown one half-page
+        pos -= Math.round(elemToScroll.height()/2);
+        if ( pos < 0 )
+            pos = 0;
+        elemToScroll[0].scrollTop = pos; 
     };
     this.resize = function() {
         var wHeight = $(window).height();
         var wWidth = $(window).width()-50;
-        var prefTASize = 450;
-        var prefImageSize = 350;
-        var prefPreviewSize = 350;
         var oldIWidth = $("#"+this.opts.images).width();
         var oldPWidth = $("#"+this.opts.target).width();
         var oldSWidth = $("#"+this.opts.source).width();
@@ -1000,9 +928,16 @@ function MMLEditor(opts, dialect) {
         var sPadTop = parseInt($("#"+this.opts.source).css("padding-top"),10);  
         var tPadBot = parseInt($("#"+this.opts.target).css("padding-bottom"),10);
         var tPadTop = parseInt($("#"+this.opts.target).css("padding-top"),10);  
+        var sBordBot = parseInt($("#"+this.opts.source).css("border-bottom-width"),10);
+        var sBordTop = parseInt($("#"+this.opts.source).css("border-top-width"),10);  
+        var tBordBot = parseInt($("#"+this.opts.target).css("border-bottom-width"),10);
+        var tBordTop = parseInt($("#"+this.opts.target).css("border-top-width"),10);  
         $("#"+this.opts.images).height(wHeight);
-        $("#"+this.opts.target).height(wHeight-(tPadBot+tPadTop));
-        $("#"+this.opts.source).height(wHeight-(sPadBot+sPadTop));
+        var tAdjust = tPadBot+tPadTop+tBordBot+tBordTop;
+        var sAdjust = sPadBot+sPadTop+sBordBot+sBordTop+2;
+        $("#"+this.opts.target).height(wHeight-tAdjust);
+        $("#"+this.opts.source).height(wHeight-sAdjust);
+        console.log("window height="+$(window).height()+" sAdjust="+sAdjust+" tAdjust="+tAdjust);
     };
     // this sets up the timer for updating
     window.setInterval(

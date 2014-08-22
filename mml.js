@@ -982,6 +982,37 @@ function MMLEditor(opts, dialect) {
         else
             alert("please wait for images to load");
     };
+    this.resize = function() {
+        var wHeight = $(window).height();
+        var wWidth = $(window).width()-50;
+        var prefTASize = 450;
+        var prefImageSize = 350;
+        var prefPreviewSize = 350;
+        var oldIWidth = $("#"+this.opts.images).width();
+        var oldPWidth = $("#"+this.opts.target).width();
+        var oldSWidth = $("#"+this.opts.source).width();
+        // compute width
+        var sumPrefs = prefTASize+prefImageSize+prefPreviewSize;
+        if ( wWidth - sumPrefs <= 200 )
+        {
+            $("#"+this.opts.images).width(oldIWidth+wWidth-sumPrefs/2);
+            $("#"+this.opts.target).width(oldPWidth+wWidth-sumPrefs/2);
+        }
+        else
+        {
+            $("#"+this.opts.images).width(Math.floor(wWidth/3));
+            $("#"+this.opts.target).width(Math.floor(wWidth/3));
+            $("#"+this.opts.source).width(Math.floor(wWidth/3));
+        }
+        // compute height
+        var sPadBot = parseInt($("#"+this.opts.source).css("padding-bottom"),10);
+        var sPadTop = parseInt($("#"+this.opts.source).css("padding-top"),10);  
+        var tPadBot = parseInt($("#"+this.opts.target).css("padding-bottom"),10);
+        var tPadTop = parseInt($("#"+this.opts.target).css("padding-top"),10);  
+        $("#"+this.opts.images).height(wHeight);
+        $("#"+this.opts.target).height(wHeight-(tPadBot+tPadTop));
+        $("#"+this.opts.source).height(wHeight-(sPadBot+sPadTop));
+    };
     // this sets up the timer for updating
     window.setInterval(
         (function(self) {
@@ -1039,4 +1070,12 @@ function MMLEditor(opts, dialect) {
             }
         })(this)
     );
-};
+    // This will execute whenever the window is resized
+    $(window).resize(
+        (function(self) {
+            self.resize();
+        })(this)
+    );
+    /* setup window */
+    this.resize();
+}
